@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{acb6e4fc-6146-4ccd-bde6-2dfd4839c62b}</ProjectGuid>
+    <RootNamespace>MonmusuPlayer</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp-3.8\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)deps\SFML-2.6.1\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp-3.8\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)deps\SFML-2.6.1\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="deps\spine-sfml-3.8\spine-sfml.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="win_media_player.h" />
+    <ClInclude Include="MonmusuPlayer.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="sfml_spine_player.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="win_dialogue.h" />
+    <ClInclude Include="win_filesystem.h" />
+    <ClInclude Include="win_text.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Animation.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AnimationState.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AnimationStateData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Atlas.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AtlasAttachmentLoader.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Attachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AttachmentLoader.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AttachmentTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Bone.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\BoneData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\BoundingBoxAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ClippingAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ColorTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\CurveTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\DeformTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\DrawOrderTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Event.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\EventData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\EventTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Extension.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraint.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraintTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Json.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\LinkedMesh.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\MathUtil.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\MeshAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraint.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintMixTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintPositionTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintSpacingTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PointAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RegionAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RotateTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RTTI.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ScaleTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ShearTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Skeleton.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonBinary.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonBounds.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonClipping.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonJson.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Skin.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Slot.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SlotData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SpineObject.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TextureLoader.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Timeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraint.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraintTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TranslateTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Triangulator.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TwoColorTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Updatable.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\VertexAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp-3.8\src\spine\VertexEffect.cpp" />
+    <ClCompile Include="deps\spine-sfml-3.8\spine-sfml.cpp" />
+    <ClCompile Include="win_media_player.cpp" />
+    <ClCompile Include="MonmusuPlayer.cpp" />
+    <ClCompile Include="sfml_spine_player.cpp" />
+    <ClCompile Include="win_dialogue.cpp" />
+    <ClCompile Include="win_filesystem.cpp" />
+    <ClCompile Include="win_text.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MonmusuPlayer.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
