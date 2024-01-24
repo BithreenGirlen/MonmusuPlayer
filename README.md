@@ -1,5 +1,5 @@
 # MonmusuPlayer
-某寝室鑑賞器。
+某TDのアレのシーン再生用。
 
 ## 動作要件
 - Windows 10 以降のWindows OS
@@ -21,7 +21,7 @@
 - [SFML-2.6.1](https://www.sfml-dev.org/download/sfml/2.6.1/)
 - [spine-cpp-3.8](https://github.com/EsotericSoftware/spine-runtimes/tree/3.8)
 
-同梱していないのでビルドする際は所定の箇所に補って下さい。
+ビルドする際は所定の箇所に補って下さい。
   <pre>
     deps
     ├ SFML-2.6.1 // 上記リンクから取得
@@ -62,16 +62,11 @@
 | PageDown | 音声減速。 |
 | Home | 音声等倍速。 |  
 ## 補足説明
-### 描画領域指定
-pngの大きさが縦横1024のものと2048のものが混在しており、且つ、atlasの寸法指定も2048のものと4096のものが混在しているため、読み込みに於ける上書き処理を削除しています。
+### 読み込み処理
+pngの大きさが縦横1024のものと2048のものが混在しており、また、atlasの寸法指定も2048のものと4096のものが混在しているため、`spine-sfml.cpp`に於ける読み込み処理の一部を削除しています。
 ```cpp
 void SFMLTextureLoader::load(AtlasPage &page, const String &path) {
-	sf::Texture *texture = new sf::Texture();
-	if (!texture->loadFromFile(path.buffer())) return;
-
-	if (page.magFilter == TextureFilter_Linear) texture->setSmooth(true);
-	if (page.uWrap == TextureWrap_Repeat && page.vWrap == TextureWrap_Repeat) texture->setRepeated(true);
-
+	/*中略*/
 	page.setRendererObject(texture);
 	/*In case atlas size does not coincide with that of png, overwriting will collapse the layout.*/
 	//sf::Vector2u size = texture->getSize();
@@ -80,27 +75,11 @@ void SFMLTextureLoader::load(AtlasPage &page, const String &path) {
 }
 ```
 
-### 描画除外指定
-一部スロットを描画から除外するよう指定しています。
+### 描画
+`sfml_spine_player.cpp`にて描画から除外するスロット、乗算合成・反転合成するスロットを指定しています。  
+但し、乗算合成に関してはアルファ値をみて最終的に適用するか判断します。
 ```cpp
-bool bFound = false;
-for (size_t ii = 0; ii < m_leaveOutList.size(); ++ii)
-{
-	if (strstr(slot.getData().getName().buffer(), m_leaveOutList.at(ii).c_str()))
-	{
-		bFound = true;
-		break;
-	}
-}
-if (bFound)
-{
-	clipper.clipEnd(slot);
-	continue;
-}
-```
-### 合成モード指定
-一部スロットを乗算合成・反転合成するよう指定しています。
-```cpp
+drawable->SetLeaveOutList(leaveOutList);
 drawable->SetBlendMultiplyList(blendMultiplyList);
 
 auto& slots = m_skeletonData.at(i).get()->getSlots();
@@ -117,12 +96,12 @@ for (size_t ii = 0; ii < slots.size(); ++ii)
 }
 ```
 ### 音声再生
-SFMLは`.m4a`ファイルに対応していないため、また、openALへの依存を避けるべく、Microsoft Media Foundationを利用しています。
+SFMLは`.m4a`ファイルに対応していないため、Microsoft Media Foundationを利用しています。OpenALの使用を避けるという狙いもあります。
 ``` cpp
-	std::unique_ptr<CMediaPlayer> pMediaPlayer = std::make_unique<CMediaPlayer>(m_window->getSystemHandle());
-	pMediaPlayer->SetFiles(m_audio_files);
+std::unique_ptr<CMediaPlayer> pMediaPlayer = std::make_unique<CMediaPlayer>(m_window->getSystemHandle());
+pMediaPlayer->SetFiles(m_audio_files);
 ```
-音声フォルダは描画素材フォルダに対して、次のような関係位置にあると想定しています。
+再生するには音声フォルダが選択フォルダに対して次のような位置関係にある必要があります。
 <pre>
   advscene
   ├ sound
@@ -138,7 +117,7 @@ SFMLは`.m4a`ファイルに対応していないため、また、openALへの�
       └ ...   └ r18_10166_2
   </pre>
 ### 立ち絵表示
-`JSON`ファイルも読み込めますが、次のような構造・拡張子形式を想定しています。
+次のようなファイル名称であれば表示できます。
 <pre>
 pose_66003_0
 ├ pose_66003_0.atlas.txt
