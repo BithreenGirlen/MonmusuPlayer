@@ -98,7 +98,6 @@ int CSfmlSpinePlayer::Display()
 	ResetScale();
 
 	/*The media player is based on Microsoft Media Foundation because SFML does not support .m4a file.*/
-
 	std::unique_ptr<CMediaPlayer> pMediaPlayer = std::make_unique<CMediaPlayer>(m_window->getSystemHandle());
 	pMediaPlayer->SetFiles(m_audio_files);
 	double dbAudioRate = 1.0;
@@ -263,7 +262,7 @@ void CSfmlSpinePlayer::Clear()
 /*描画器設定*/
 bool CSfmlSpinePlayer::SetupDrawer()
 {
-	const std::vector<std::string> blendScreenList{ "Breath", "Mist", "Bless", "Eff", "Smoke", "Toiki", "Steam", "Moya"};
+	const std::vector<std::string> blendScreenList{ "Breath", "Mist", "Bless", "Eff", "Smoke", "Toiki", "Steam", "Moya", "Yuge"};
 	const std::vector<std::string> blendMultiplyList{"Cheek"};
 	const std::vector<std::string> leaveOutList{ "Mask", "White"};
 
@@ -330,7 +329,7 @@ bool CSfmlSpinePlayer::SetupDrawer()
 
 	return m_animationNames.size() > 0;
 }
-/*標準長算出*/
+/*既定寸法算出*/
 void CSfmlSpinePlayer::WorkOutDefaultSize()
 {
 	if (m_skeletonData.empty())return;
@@ -343,25 +342,24 @@ void CSfmlSpinePlayer::WorkOutDefaultSize()
 
 	if (uiSkeletonWidth < uiDesktopWidth && uiSkeletonHeight < uiDesktopHeight)
 	{
-		m_fDefaultScale = 1.f;
+		m_fDefaultWindowScale = 1.025f;
 	}
 	else
 	{
 		if (uiDesktopWidth > uiDesktopHeight)
 		{
-			m_fDefaultScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
+			m_fDefaultWindowScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
 			m_iDefaultOffset = sf::Vector2i(0, (uiSkeletonHeight - uiDesktopHeight) / 2);
 		}
 		else
 		{
-			m_fDefaultScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
+			m_fDefaultWindowScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
 			m_iDefaultOffset = sf::Vector2i((uiSkeletonWidth - uiDesktopWidth) / 2, 0);
 		}
-
-		m_fSkeletonScale = m_fDefaultScale;
+		m_fDefaultWindowScale += 0.025f;
 	}
 }
-/*尺度変更適用*/
+/*尺度設定*/
 void CSfmlSpinePlayer::RescaleSkeleton()
 {
 	for (size_t i = 0; i < m_drawables.size(); ++i)
@@ -370,14 +368,10 @@ void CSfmlSpinePlayer::RescaleSkeleton()
 		m_drawables.at(i).get()->skeleton->setScaleY(m_fSkeletonScale > 0.99f ? m_fSkeletonScale : 1.f);
 	}
 
-	unsigned int uiWindowWidthMax = static_cast<unsigned int>(m_fMaxWidth * (m_fSkeletonScale - 0.025f));
-	unsigned int uiWindowHeightMax = static_cast<unsigned int>(m_fMaxHeight * (m_fSkeletonScale - 0.025f));
-	if (uiWindowWidthMax < sf::VideoMode::getDesktopMode().width || uiWindowHeightMax < sf::VideoMode::getDesktopMode().height)
-	{
-		ResizeWindow();
-	}
+	m_fWindowScale = m_fSkeletonScale > m_fDefaultWindowScale ? m_fDefaultWindowScale : m_fSkeletonScale;
+	ResizeWindow();
 }
-/*速度変更適用*/
+/*速度設定*/
 void CSfmlSpinePlayer::RescaleTime()
 {
 	if (m_fTimeScale < 0.f)m_fTimeScale = 0.f;
@@ -390,7 +384,7 @@ void CSfmlSpinePlayer::RescaleTime()
 void CSfmlSpinePlayer::ResetScale()
 {
 	m_fTimeScale = 1.0f;
-	m_fSkeletonScale = m_fDefaultScale;
+	m_fSkeletonScale = 1.0f;
 	m_iOffset = m_iDefaultOffset;
 
 	RescaleSkeleton();
@@ -403,7 +397,7 @@ void CSfmlSpinePlayer::ResizeWindow()
 {
 	if (m_window.get() != nullptr)
 	{
-		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(m_fMaxWidth * m_fSkeletonScale), static_cast<unsigned int>(m_fMaxHeight * m_fSkeletonScale)));
+		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(m_fMaxWidth * m_fWindowScale), static_cast<unsigned int>(m_fMaxHeight * m_fWindowScale)));
 	}
 }
 /*視点移動*/

@@ -25,7 +25,8 @@ private:
 
 	float m_fMaxWidth = 1920.f;
 	float m_fMaxHeight = 1080.f;
-	float m_fDefaultScale = 1.f;
+	float m_fDefaultWindowScale = 1.f;
+	float m_fWindowScale = 1.f;
 	sf::Vector2i m_iDefaultOffset{};
 
 	float m_fTimeScale = 1.f;
