@@ -26,8 +26,7 @@ private:
 	float m_fMaxWidth = 1920.f;
 	float m_fMaxHeight = 1080.f;
 	float m_fDefaultWindowScale = 1.f;
-	float m_fWindowScale = 1.f;
-	sf::Vector2i m_iDefaultOffset{};
+	float m_fThresholdScale = 1.f;
 
 	float m_fTimeScale = 1.f;
 	float m_fSkeletonScale = 1.f;
@@ -42,7 +41,7 @@ private:
 	void Clear();
 
 	bool SetupDrawer();
-	void WorkOutDefaultSize();
+	void WorkOutDefaultScale();
 
 	void RescaleSkeleton();
 	void RescaleTime();

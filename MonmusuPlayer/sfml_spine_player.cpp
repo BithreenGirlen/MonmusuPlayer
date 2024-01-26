@@ -74,7 +74,7 @@ bool CSfmlSpinePlayer::SetSpine(const std::vector<std::string>& atlasPaths, cons
 	m_fMaxWidth = m_skeletonData.at(0).get()->getWidth();
 	m_fMaxHeight = m_skeletonData.at(0).get()->getHeight();
 
-	WorkOutDefaultSize();
+	WorkOutDefaultScale();
 
 	return SetupDrawer();
 }
@@ -329,8 +329,8 @@ bool CSfmlSpinePlayer::SetupDrawer()
 
 	return m_animationNames.size() > 0;
 }
-/*既定寸法算出*/
-void CSfmlSpinePlayer::WorkOutDefaultSize()
+/*標準尺度算出*/
+void CSfmlSpinePlayer::WorkOutDefaultScale()
 {
 	if (m_skeletonData.empty())return;
 
@@ -340,36 +340,37 @@ void CSfmlSpinePlayer::WorkOutDefaultSize()
 	unsigned int uiDesktopWidth = sf::VideoMode::getDesktopMode().width;
 	unsigned int uiDesktopHeight = sf::VideoMode::getDesktopMode().height;
 
-	if (uiSkeletonWidth < uiDesktopWidth && uiSkeletonHeight < uiDesktopHeight)
-	{
-		m_fDefaultWindowScale = 1.025f;
-	}
-	else
+	if (uiSkeletonWidth > uiDesktopWidth || uiSkeletonHeight > uiDesktopHeight)
 	{
 		if (uiDesktopWidth > uiDesktopHeight)
 		{
-			m_fDefaultWindowScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
-			m_iDefaultOffset = sf::Vector2i(0, (uiSkeletonHeight - uiDesktopHeight) / 2);
+			m_fDefaultWindowScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
+			m_fThresholdScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
 		}
 		else
 		{
-			m_fDefaultWindowScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
-			m_iDefaultOffset = sf::Vector2i((uiSkeletonWidth - uiDesktopWidth) / 2, 0);
+			m_fDefaultWindowScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
+			m_fThresholdScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
 		}
-		m_fDefaultWindowScale += 0.025f;
+		m_fSkeletonScale = m_fDefaultWindowScale;
 	}
 }
 /*尺度設定*/
 void CSfmlSpinePlayer::RescaleSkeleton()
 {
+	float fOffset = m_fSkeletonScale - m_fThresholdScale > 0.f ? m_fSkeletonScale - m_fThresholdScale : 0;
 	for (size_t i = 0; i < m_drawables.size(); ++i)
 	{
-		m_drawables.at(i).get()->skeleton->setScaleX(m_fSkeletonScale > 0.99f ? m_fSkeletonScale : 1.f);
-		m_drawables.at(i).get()->skeleton->setScaleY(m_fSkeletonScale > 0.99f ? m_fSkeletonScale : 1.f);
+		m_drawables.at(i).get()->skeleton->setScaleX(m_fSkeletonScale > 0.99f + fOffset ? m_fSkeletonScale : 1.f + fOffset);
+		m_drawables.at(i).get()->skeleton->setScaleY(m_fSkeletonScale > 0.99f + fOffset ? m_fSkeletonScale : 1.f + fOffset);
 	}
 
-	m_fWindowScale = m_fSkeletonScale > m_fDefaultWindowScale ? m_fDefaultWindowScale : m_fSkeletonScale;
-	ResizeWindow();
+	unsigned int uiWindowWidthMax = static_cast<unsigned int>(m_fMaxWidth * (m_fSkeletonScale - 0.025f));
+	unsigned int uiWindowHeightMax = static_cast<unsigned int>(m_fMaxHeight * (m_fSkeletonScale - 0.025f));
+	if (uiWindowWidthMax < sf::VideoMode::getDesktopMode().width || uiWindowHeightMax < sf::VideoMode::getDesktopMode().height)
+	{
+		ResizeWindow();
+	}
 }
 /*速度設定*/
 void CSfmlSpinePlayer::RescaleTime()
@@ -384,8 +385,8 @@ void CSfmlSpinePlayer::RescaleTime()
 void CSfmlSpinePlayer::ResetScale()
 {
 	m_fTimeScale = 1.0f;
-	m_fSkeletonScale = 1.0f;
-	m_iOffset = m_iDefaultOffset;
+	m_fSkeletonScale = m_fDefaultWindowScale;
+	m_iOffset = sf::Vector2i{};
 
 	RescaleSkeleton();
 	RescaleTime();
@@ -397,7 +398,7 @@ void CSfmlSpinePlayer::ResizeWindow()
 {
 	if (m_window.get() != nullptr)
 	{
-		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(m_fMaxWidth * m_fWindowScale), static_cast<unsigned int>(m_fMaxHeight * m_fWindowScale)));
+		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(m_fMaxWidth * m_fSkeletonScale), static_cast<unsigned int>(m_fMaxHeight * m_fSkeletonScale)));
 	}
 }
 /*視点移動*/
