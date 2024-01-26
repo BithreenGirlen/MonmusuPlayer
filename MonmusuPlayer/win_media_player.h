@@ -70,31 +70,26 @@ public:
     void UpScale();
     void DownScale();
 private:
-
     HWND m_hRetWnd = nullptr;
-
-    std::mutex m_mutex;
 
 	HRESULT m_hrComInit = E_FAIL;
 	HRESULT m_hrMfStart = E_FAIL;
-
-	CMediaPlayerNotify* m_pmfNotify = nullptr;
+    CMediaPlayerNotify* m_pmfNotify = nullptr;
 	IMFMediaEngineEx* m_pmfEngineEx = nullptr;
+    std::mutex m_mutex;
 
     std::vector<std::wstring> m_media_files;
     size_t m_nIndex = 0;
 
+    BOOL m_iLoop = FALSE;
+    BOOL m_iMute = FALSE;
+
     RECT m_srcRect{};
     double m_dbScale = 1.0;
-
     bool m_bBarHidden = false;
 
     void Clear();
     void ResizeBuffer();
-
-    BOOL m_iLoop = FALSE;
-    BOOL m_iMute = FALSE;
-
 };
 
 #endif //WIN_MEDIA_PLAYER_H_
