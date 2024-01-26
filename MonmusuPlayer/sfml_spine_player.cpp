@@ -262,7 +262,7 @@ void CSfmlSpinePlayer::Clear()
 /*•`‰æŠíİ’è*/
 bool CSfmlSpinePlayer::SetupDrawer()
 {
-	const std::vector<std::string> blendScreenList{ "Breath", "Mist", "Bless", "Eff", "Smoke", "Toiki", "Steam", "Moya", "Yuge"};
+	const std::vector<std::string> blendScreenList{ "Breath", "Mist", "Bless", "Eff", "Smoke", "Toiki", "Steam", "Moya", "Yuge", "Sand_", "Bress"};
 	const std::vector<std::string> blendMultiplyList{"Cheek"};
 	const std::vector<std::string> leaveOutList{ "Mask", "White"};
 
