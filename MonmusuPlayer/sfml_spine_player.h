@@ -5,26 +5,36 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "deps/spine-sfml-3.8/spine-sfml.h"
+#include "adv.h"
+#include "deps/spine-sfml/spine-sfml.h"
+
+/*Windows OS*/
+#include "mf_media_player.h"
 
 class CSfmlSpinePlayer
 {
 public:
 	CSfmlSpinePlayer();
 	~CSfmlSpinePlayer();
-	bool SetSpine(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool bIsBinary);
-	void SetAudios(std::vector<std::wstring>& filePaths);
-	int Display();
+	bool SetSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool bIsBinary);
+	bool SetSpineFromMemory(const std::vector<std::string>& atlasData, const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelData, bool bIsBinary);
+	bool SetFont(const std::string& strFilePath, bool bBold, bool bItalic);
+	void SetTexts(const std::vector<adv::TextDatum>& textData);
+	int Display(const wchar_t* pwzWindowName);
+	void ConsoleTestOutput();
 private:
+	enum Size { kBaseWidth = 1280, kBaseHeight = 700 };
+
 	spine::SFMLTextureLoader m_textureLoader;
 	std::vector<std::unique_ptr<spine::Atlas>> m_atlases;
 	std::vector<std::shared_ptr<spine::SkeletonData>> m_skeletonData;
 	std::vector<std::shared_ptr<spine::SkeletonDrawable>> m_drawables;
 
 	std::unique_ptr<sf::RenderWindow> m_window;
+	sf::Vector2f m_BaseWindowSize = sf::Vector2f{ Size::kBaseWidth, Size::kBaseHeight };
 
-	float m_fMaxWidth = 1920.f;
-	float m_fMaxHeight = 1080.f;
+	const float m_kfScalePortion = 0.025f;
+
 	float m_fDefaultWindowScale = 1.f;
 	float m_fThresholdScale = 1.f;
 
@@ -35,23 +45,44 @@ private:
 	std::vector<std::string> m_animationNames;
 	size_t m_nAnimationIndex = 0;
 
-	std::vector<std::wstring> m_audio_files;
-	size_t m_nAudioIndex = 0;
+	std::vector<std::string> m_skinNames;
+	size_t m_nSkinIndex = 0;
 
-	void Clear();
+	sf::Font m_font;
+	sf::Text m_msgText;
+	sf::Clock m_clock;
+
+	size_t m_nTextIndex = 0;
+	std::vector<adv::TextDatum> m_textData;
+	bool m_bTextHidden = false;
 
 	bool SetupDrawer();
 	void WorkOutDefaultScale();
 
-	void RescaleSkeleton();
-	void RescaleTime();
+	void RescaleSkeleton(bool bUpscale);
+	void RescaleTime(bool bHasten);
+	void UpdateScaletonScale();
+	void UpdateTimeScale();
 	void ResetScale();
 	void ResizeWindow();
 
 	void MoveViewPoint(int iX, int iY);
 	void ShiftScene();
 
+	void ShiftSkin(bool bForward);
+	void UpdateSkin();
+
+	void SwitchTextColor();
+
+	void AdjustTextPosition();
+
+	void CheckTimer();
+	void ShiftMessageText(bool bForward);
+	void UpdateMessageText();
+
 	void Redraw(float fDelta);
+
+	std::unique_ptr<CMfMediaPlayer> m_pAudioPlayer;
 };
 
 #endif // SFML_SPINE_PLAYER_H_
