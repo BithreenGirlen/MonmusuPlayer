@@ -16,17 +16,17 @@
     <Filter Include="ヘッダー ファイル\deps">
       <UniqueIdentifier>{08879d04-202c-4443-a863-1bd37833dab7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\deps\spine-sfml-3.8">
-      <UniqueIdentifier>{f147e2f0-4f03-41db-8008-d60f8d54a978}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\deps">
       <UniqueIdentifier>{6b50987d-3d51-4f95-99a9-299169f94439}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\deps\spine-sfml-3.8">
+    <Filter Include="ソース ファイル\deps\spine-sfml">
       <UniqueIdentifier>{c26b5f5b-be09-4d11-bdd4-eb99eea4941e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\deps\spine-cpp-3.8">
-      <UniqueIdentifier>{93258bb9-1ea1-49ad-a0fb-8ea8425309af}</UniqueIdentifier>
+    <Filter Include="ヘッダー ファイル\deps\spine-sfml">
+      <UniqueIdentifier>{f147e2f0-4f03-41db-8008-d60f8d54a978}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\deps\spine-cpp">
+      <UniqueIdentifier>{14cfe719-9bed-49e3-b1e8-8a4c43972b77}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,9 +42,6 @@
     <ClInclude Include="MonmusuPlayer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="deps\spine-sfml-3.8\spine-sfml.h">
-      <Filter>ヘッダー ファイル\deps\spine-sfml-3.8</Filter>
-    </ClInclude>
     <ClInclude Include="sfml_spine_player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -57,199 +54,25 @@
     <ClInclude Include="win_text.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="win_media_player.h">
+    <ClInclude Include="adv.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="mf_media_player.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="mnms.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="spine_loader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="deps\spine-sfml\spine-sfml.h">
+      <Filter>ヘッダー ファイル\deps\spine-sfml</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MonmusuPlayer.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Animation.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AnimationState.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AnimationStateData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Atlas.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AtlasAttachmentLoader.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Attachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AttachmentLoader.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AttachmentTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Bone.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\BoneData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\BoundingBoxAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ClippingAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ColorTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ConstraintData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\CurveTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\DeformTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\DrawOrderTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Event.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\EventData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\EventTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Extension.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraint.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraintData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraintTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Json.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\LinkedMesh.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\MathUtil.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\MeshAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraint.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintMixTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintPositionTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintSpacingTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PointAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RegionAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RotateTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RTTI.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ScaleTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ShearTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Skeleton.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonBinary.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonBounds.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonClipping.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonJson.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Skin.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Slot.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SlotData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SpineObject.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TextureLoader.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Timeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraint.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraintData.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraintTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TranslateTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Triangulator.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TwoColorTimeline.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Updatable.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\VertexAttachment.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\VertexEffect.cpp">
-      <Filter>ソース ファイル\deps\spine-cpp-3.8</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-sfml-3.8\spine-sfml.cpp">
-      <Filter>ソース ファイル\deps\spine-sfml-3.8</Filter>
     </ClCompile>
     <ClCompile Include="sfml_spine_player.cpp">
       <Filter>ソース ファイル</Filter>
@@ -263,8 +86,200 @@
     <ClCompile Include="win_text.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="win_media_player.cpp">
+    <ClCompile Include="mf_media_player.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="mnms.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="spine_loader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-sfml\spine-sfml.cpp">
+      <Filter>ソース ファイル\deps\spine-sfml</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Animation.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\AnimationState.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\AnimationStateData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Atlas.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\AtlasAttachmentLoader.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Attachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\AttachmentLoader.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\AttachmentTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Bone.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\BoneData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\BoundingBoxAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\ClippingAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\ColorTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\ConstraintData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\CurveTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\DeformTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\DrawOrderTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Event.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\EventData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\EventTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Extension.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\IkConstraint.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\IkConstraintData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\IkConstraintTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Json.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\LinkedMesh.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\MathUtil.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\MeshAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PathAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraint.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintMixTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintPositionTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintSpacingTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\PointAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\RegionAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\RotateTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\RTTI.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\ScaleTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\ShearTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Skeleton.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonBinary.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonBounds.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonClipping.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonJson.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Skin.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Slot.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SlotData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\SpineObject.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\TextureLoader.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Timeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\TransformConstraint.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\TransformConstraintData.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\TransformConstraintTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\TranslateTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Triangulator.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\TwoColorTimeline.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\Updatable.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\VertexAttachment.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="deps\spine-cpp\src\spine\VertexEffect.cpp">
+      <Filter>ソース ファイル\deps\spine-cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
