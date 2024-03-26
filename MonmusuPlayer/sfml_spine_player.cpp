@@ -189,17 +189,20 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 				case sf::Keyboard::Key::C:
 					SwitchTextColor();
 					break;
-				case sf::Keyboard::Key::S:
-					for (size_t i = 0; i < m_drawables.size(); ++i)
-					{
-						m_drawables.at(i).get()->SwitchHiddenness();
-					}
-					break;
 				case sf::Keyboard::Key::T:
 					m_bTextHidden ^= true;
 					break;
 				case sf::Keyboard::Key::Escape:
 					m_window->close();
+					break;
+				case sf::Keyboard::Key::PageUp:
+					ChangePlaybackRate(true);
+					break;
+				case sf::Keyboard::Key::PageDown:
+					ChangePlaybackRate(false);
+					break;
+				case sf::Keyboard::Key::Home:
+					ResetPlacybackRate();
 					break;
 				case sf::Keyboard::Key::Up:
 					iRet = 2;
@@ -281,7 +284,7 @@ bool CSfmlSpinePlayer::SetupDrawer()
 	}
 
 	/*寝室再生順*/
-	const std::vector<std::string> fixedNames = { "Wait", "Normal", "Fast", "Finish", "After" };
+	std::vector<std::string> fixedNames = { "Wait", "Normal", "Fast", "Finish", "After" };
 	auto IsR18 = [&fixedNames](const std::string& str)
 		-> bool
 		{
@@ -291,6 +294,11 @@ bool CSfmlSpinePlayer::SetupDrawer()
 			}
 			return false;
 		};
+	if (m_animationNames.size()  == 6)
+	{
+		/*静画*/
+		fixedNames.push_back("sa");
+	}
 	if (std::all_of(m_animationNames.begin(), m_animationNames.end(), IsR18))
 	{
 		m_animationNames = fixedNames;
@@ -304,8 +312,6 @@ bool CSfmlSpinePlayer::SetupDrawer()
 			drawable->state->setAnimation(0, m_animationNames.at(0).c_str(), true);
 		}
 	}
-
-	UpdateSkin();
 
 	return m_animationNames.size() > 0;
 }
@@ -464,7 +470,7 @@ void CSfmlSpinePlayer::SwitchTextColor()
 /*文章表示位置調整*/
 void CSfmlSpinePlayer::AdjustTextPosition()
 {
-	/*左上に表示するので処理なし*/
+	/*左下表示用*/
 	//int iScaletonHeight = static_cast<int>(m_BaseWindowSize.y * m_fSkeletonScale);
 	//int iClientHeight = sf::VideoMode::getDesktopMode().height;
 
@@ -483,18 +489,15 @@ void CSfmlSpinePlayer::CheckTimer()
 {
 	constexpr float fAutoPlayInterval = 2.f;
 	float fSecond = m_clock.getElapsedTime().asSeconds();
-	if (fSecond > fAutoPlayInterval)
+	if (m_pAudioPlayer.get() != nullptr && m_pAudioPlayer.get()->IsEnded() && fSecond > fAutoPlayInterval)
 	{
-		if (m_pAudioPlayer.get() != nullptr &&m_pAudioPlayer.get()->IsEnded() && fSecond > fAutoPlayInterval)
+		if (m_nTextIndex < m_textData.size() - 1)
 		{
-			if (m_nTextIndex < m_textData.size() - 1)
-			{
-				ShiftMessageText(true);
-			}
-			else
-			{
-				m_clock.restart();
-			}
+			ShiftMessageText(true);
+		}
+		else
+		{
+			m_clock.restart();
 		}
 	}
 }
@@ -516,6 +519,8 @@ void CSfmlSpinePlayer::ShiftMessageText(bool bForward)
 
 void CSfmlSpinePlayer::UpdateMessageText()
 {
+	if (m_textData.empty())return;
+
 	const adv::TextDatum& textDatum = m_textData.at(m_nTextIndex);
 	std::wstring wstr = textDatum.wstrText + L"\r\n " + std::to_wstring(m_nTextIndex + 1) + L"/" + std::to_wstring(m_textData.size());
 	m_msgText.setString(wstr);
@@ -545,5 +550,32 @@ void CSfmlSpinePlayer::Redraw(float fDelta)
 			m_window->draw(m_msgText);
 		}
 		m_window->display();
+	}
+}
+
+void CSfmlSpinePlayer::ChangePlaybackRate(bool bFaster)
+{
+	if (m_pAudioPlayer.get() != nullptr)
+	{
+		double dbRate = m_pAudioPlayer.get()->GetCurrentRate();
+		constexpr double fRatePortion = 0.1;
+		if (bFaster && dbRate < 2.49)
+		{
+			dbRate += fRatePortion;
+		}
+		else if (!bFaster && dbRate > 0.51)
+		{
+			dbRate -= fRatePortion;
+
+		}
+		m_pAudioPlayer.get()->SetCurrentRate(dbRate);
+	}
+}
+
+void CSfmlSpinePlayer::ResetPlacybackRate()
+{
+	if (m_pAudioPlayer.get() != nullptr)
+	{
+		m_pAudioPlayer.get()->SetCurrentRate(1.0);
 	}
 }

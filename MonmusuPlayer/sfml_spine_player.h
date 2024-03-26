@@ -82,6 +82,8 @@ private:
 	void Redraw(float fDelta);
 
 	std::unique_ptr<CMfMediaPlayer> m_pAudioPlayer;
+	void ChangePlaybackRate(bool bFaster);
+	void ResetPlacybackRate();
 };
 
 #endif // SFML_SPINE_PLAYER_H_

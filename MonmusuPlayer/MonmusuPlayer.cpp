@@ -40,7 +40,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
             if (textData.empty())
             {
-                /*.txtなし・読み取り失敗*/
+                /*.jsonなし・読み取り失敗*/
                 std::wstring wstrAudioFolderPath;
                 mnms::DeriveAudioFolderPathFromSpineFolderPath(wstrFolderPath, wstrAudioFolderPath);
 
