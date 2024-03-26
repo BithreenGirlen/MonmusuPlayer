@@ -21,7 +21,6 @@ public:
 	bool SetFont(const std::string& strFilePath, bool bBold, bool bItalic);
 	void SetTexts(const std::vector<adv::TextDatum>& textData);
 	int Display(const wchar_t* pwzWindowName);
-	void ConsoleTestOutput();
 private:
 	enum Size { kBaseWidth = 1280, kBaseHeight = 700 };
 

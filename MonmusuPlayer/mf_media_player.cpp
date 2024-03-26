@@ -182,14 +182,23 @@ bool CMfMediaPlayer::SetCurrentRate(double dbRate)
 	}
 	return false;
 }
-/*再生終了是否*/
+/*再生中是否*/
 bool CMfMediaPlayer::IsEnded()
 {
 	if (m_pmfEngineEx != nullptr)
 	{
-		return m_pmfEngineEx->IsEnded() == TRUE;
+		BOOL iRet = m_pmfEngineEx->HasAudio();
+		iRet |= m_pmfEngineEx->HasVideo();
+		if (!iRet)
+		{
+			return true;
+		}
+		else
+		{
+			return m_pmfEngineEx->IsEnded() == TRUE;
+		}
 	}
-	/*非割り当て時は終了と判断*/
+
 	return true;
 }
 /*動画縦横幅取得*/

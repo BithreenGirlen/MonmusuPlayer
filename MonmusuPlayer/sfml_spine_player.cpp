@@ -485,21 +485,16 @@ void CSfmlSpinePlayer::CheckTimer()
 	float fSecond = m_clock.getElapsedTime().asSeconds();
 	if (fSecond > fAutoPlayInterval)
 	{
-		bool bIsEnded = true;
-		if (m_pAudioPlayer.get() != nullptr)
+		if (m_pAudioPlayer.get() != nullptr &&m_pAudioPlayer.get()->IsEnded() && fSecond > fAutoPlayInterval)
 		{
-			if (m_pAudioPlayer.get()->IsEnded())
+			if (m_nTextIndex < m_textData.size() - 1)
 			{
-				bIsEnded = false;
+				ShiftMessageText(true);
 			}
-		}
-		if (bIsEnded && m_nTextIndex < m_textData.size() - 1)
-		{
-			ShiftMessageText(true);
-		}
-		else
-		{
-			m_clock.restart();
+			else
+			{
+				m_clock.restart();
+			}
 		}
 	}
 }

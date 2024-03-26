@@ -10,12 +10,6 @@
 
 namespace mnms
 {
-    /*ó‚¯“n‚µ‚ª–Ê“|‚È‚Ì‚ÅÄ¶‹@‘¤‚É’¼‘‚«*/
-
-    //const std::vector<std::string> blendScreenList{ "Breath", "Mist", "Bless", "Eff", "Smoke", "Toiki", "Steam", "Moya", "Yuge", "Sand_", "Bress", "sigh", "Fog", "Spore" };
-    //const std::vector<std::string> blendMultiplyList{ "Cheek" };
-    //const std::vector<std::string> leaveOutList{ "Mask", "White" };
-
     std::wstring g_wstrVoiceFolderPath;
 
     bool SetVoiceFolderPath(const std::wstring& wstrScenarioFiLePath)
