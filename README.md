@@ -4,6 +4,7 @@
 ## 動作要件
 - Windows 10 以降のWindows OS
 - MSVC 2015-2022 (x64)
+- 游明朝
 ## 再生方法
 フォルダ選択ダイアログから次のようなフォルダを開くと再生を開始します。
 
@@ -20,6 +21,7 @@
 ## Libraries
 - [SFML-2.6.1](https://www.sfml-dev.org/download/sfml/2.6.1/)
 - [spine-cpp-3.8](https://github.com/EsotericSoftware/spine-runtimes/tree/3.8)
+- [JSON for Modern C++ v3.11.3](https://github.com/nlohmann/json/releases/tag/v3.11.3)
 
 ビルドする際は所定の箇所に補って下さい。
   <pre>
@@ -30,14 +32,14 @@
     │   │       └ ...
     │   └ lib
     │       └ ...
-    ├ spine-cpp-3.8 // 上記リンクから取得
+    ├ spine-cpp // 上記リンクから取得
     │   ├ include
     │   │   └ spine
     │   │       └ ...
     │   └ src
     │       └ spine
     │           └ ...
-    └ spine-sfml-3.8 // 同梱済み
+    └ spine-sfml // 同梱済み
         ├ spine-sfml.cpp
         └ spine-sfml.h
   </pre>
@@ -49,13 +51,15 @@
 | 左ボタン + マウスホイール | コマ送り加速・減速 |
 | 左ボタンクリック | 次場面移行。 |
 | 左ボタンドラッグ | 視点移動。 |
-| 中央ボタン | 拡縮・速度・視点初期化。 |
-| 右ボタン + マウスホイール | 音声送り・戻し。 |
+| 中ボタン | 尺度・速度・視点初期化。 |
+| 右ボタン + マウスホイール | 文章送り・戻し。 |
 | 右ボタン + 左ボタンクリック | 窓移動。 |
 ## キー操作
 | 入力  | 機能  |
 | --- | --- |
 | Esc | 再生終了。 |
+| C   | 文字色黒・白切り替え。 |
+| T   | 文章表示・非表示切り替え。 |
 | Up | 前のフォルダに移動。 |
 | Down | 次のフォルダに移動。 |
 | PageUp | 音声加速。 |
@@ -96,11 +100,7 @@ for (size_t ii = 0; ii < slots.size(); ++ii)
 }
 ```
 ### 音声再生
-SFMLは`.m4a`ファイルに対応していないため、Microsoft Media Foundationを利用しています。OpenALの使用を避けるという狙いもあります。
-``` cpp
-std::unique_ptr<CMediaPlayer> pMediaPlayer = std::make_unique<CMediaPlayer>(m_window->getSystemHandle());
-pMediaPlayer->SetFiles(m_audio_files);
-```
+SFMLが`.m4a`ファイルに対応していないため、Microsoft Media Foundationを利用しています。  
 再生するには音声フォルダが選択フォルダに対して次のような位置関係にある必要があります。
 <pre>
   advscene
@@ -116,6 +116,14 @@ pMediaPlayer->SetFiles(m_audio_files);
       │   └ r18_scenes
       └ ...   └ r18_10166_2
   </pre>
+### 文章表示
+選択フォルダに対して脚本ファイルが次のような相対位置のフォルダに存在する場合には文章が表示されます。  
+__選択フォルダ__  
+`.../advscene/resources/advscene/texture/character/r18_scenes/r18_10166_2`  
+__脚本フォルダ__  
+`.../advscene/scenarioexcel/character/10166`  
+文章には通し番号を振ってあります。
+
 ### 立ち絵表示
 次のようなファイル名称であれば表示できます。
 <pre>

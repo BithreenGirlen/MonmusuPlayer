@@ -1,4 +1,4 @@
-
+﻿
 #include <shlwapi.h>
 
 #include "win_text.h"

@@ -44,11 +44,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp-3.8\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)deps\SFML-2.6.1\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp-3.8\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)deps\SFML-2.6.1\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -80,83 +80,88 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="deps\spine-sfml-3.8\spine-sfml.h" />
+    <ClInclude Include="adv.h" />
+    <ClInclude Include="deps\spine-sfml\spine-sfml.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="win_media_player.h" />
+    <ClInclude Include="mf_media_player.h" />
+    <ClInclude Include="mnms.h" />
     <ClInclude Include="MonmusuPlayer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="sfml_spine_player.h" />
+    <ClInclude Include="spine_loader.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="win_dialogue.h" />
     <ClInclude Include="win_filesystem.h" />
     <ClInclude Include="win_text.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Animation.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AnimationState.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AnimationStateData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Atlas.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AtlasAttachmentLoader.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Attachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AttachmentLoader.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\AttachmentTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Bone.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\BoneData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\BoundingBoxAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ClippingAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ColorTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ConstraintData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\CurveTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\DeformTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\DrawOrderTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Event.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\EventData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\EventTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Extension.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraint.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraintData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\IkConstraintTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Json.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\LinkedMesh.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\MathUtil.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\MeshAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraint.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintMixTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintPositionTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PathConstraintSpacingTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\PointAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RegionAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RotateTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\RTTI.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ScaleTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\ShearTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Skeleton.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonBinary.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonBounds.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonClipping.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SkeletonJson.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Skin.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Slot.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SlotData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\SpineObject.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TextureLoader.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Timeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraint.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraintData.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TransformConstraintTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TranslateTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Triangulator.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\TwoColorTimeline.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\Updatable.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\VertexAttachment.cpp" />
-    <ClCompile Include="deps\spine-cpp-3.8\src\spine\VertexEffect.cpp" />
-    <ClCompile Include="deps\spine-sfml-3.8\spine-sfml.cpp" />
-    <ClCompile Include="win_media_player.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Animation.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\AnimationState.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\AnimationStateData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Atlas.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\AtlasAttachmentLoader.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Attachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\AttachmentLoader.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\AttachmentTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Bone.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\BoneData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\BoundingBoxAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\ClippingAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\ColorTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\ConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\CurveTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\DeformTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\DrawOrderTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Event.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\EventData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\EventTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Extension.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\IkConstraint.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\IkConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\IkConstraintTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Json.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\LinkedMesh.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\MathUtil.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\MeshAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PathAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraint.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintMixTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintPositionTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PathConstraintSpacingTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\PointAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\RegionAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\RotateTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\RTTI.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\ScaleTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\ShearTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Skeleton.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonBinary.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonBounds.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonClipping.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SkeletonJson.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Skin.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Slot.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SlotData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\SpineObject.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\TextureLoader.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Timeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\TransformConstraint.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\TransformConstraintData.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\TransformConstraintTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\TranslateTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Triangulator.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\TwoColorTimeline.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\Updatable.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\VertexAttachment.cpp" />
+    <ClCompile Include="deps\spine-cpp\src\spine\VertexEffect.cpp" />
+    <ClCompile Include="deps\spine-sfml\spine-sfml.cpp" />
+    <ClCompile Include="mf_media_player.cpp" />
+    <ClCompile Include="mnms.cpp" />
     <ClCompile Include="MonmusuPlayer.cpp" />
     <ClCompile Include="sfml_spine_player.cpp" />
+    <ClCompile Include="spine_loader.cpp" />
     <ClCompile Include="win_dialogue.cpp" />
     <ClCompile Include="win_filesystem.cpp" />
     <ClCompile Include="win_text.cpp" />

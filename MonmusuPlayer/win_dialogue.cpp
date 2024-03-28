@@ -1,4 +1,4 @@
-
+Ôªø
 #include <shobjidl.h>
 #include <atlbase.h>
 
@@ -11,8 +11,8 @@ struct ComInit
 	~ComInit() { if (SUCCEEDED(m_hrComInit)) ::CoUninitialize(); }
 };
 
-/*ÉtÉHÉãÉ_ëIëÉ_ÉCÉAÉçÉO*/
-std::wstring win_dialogue::SelectWorkFolder()
+/*„Éï„Ç©„É´„ÉÄÈÅ∏Êäû„ÉÄ„Ç§„Ç¢„É≠„Ç∞*/
+std::wstring win_dialogue::SelectWorkFolder(void* hParentWnd)
 {
 	ComInit sInit;
 	CComPtr<IFileOpenDialog> pFolderDlg;
@@ -23,7 +23,7 @@ std::wstring win_dialogue::SelectWorkFolder()
 		pFolderDlg->GetOptions(&opt);
 		pFolderDlg->SetOptions(opt | FOS_PICKFOLDERS | FOS_PATHMUSTEXIST | FOS_FORCEFILESYSTEM);
 
-		if (SUCCEEDED(pFolderDlg->Show(nullptr)))
+		if (SUCCEEDED(pFolderDlg->Show(static_cast<HWND>(hParentWnd))))
 		{
 			CComPtr<IShellItem> pSelectedItem;
 			pFolderDlg->GetResult(&pSelectedItem);
@@ -37,9 +37,51 @@ std::wstring win_dialogue::SelectWorkFolder()
 				::CoTaskMemFree(pPath);
 				return wstrPath;
 			}
-
 		}
 	}
 
 	return std::wstring();
+}
+
+std::wstring win_dialogue::SelectOpenFile(const wchar_t* pwzFileType, const wchar_t* pwzSpec, void* hParentWnd)
+{
+	ComInit sInit;
+	CComPtr<IFileOpenDialog> pFileDialog;
+	HRESULT hr = pFileDialog.CoCreateInstance(CLSID_FileOpenDialog);
+
+	if (SUCCEEDED(hr)) {
+		COMDLG_FILTERSPEC filter[1]{};
+		filter[0].pszName = pwzFileType;
+		filter[0].pszSpec = pwzSpec;
+		hr = pFileDialog->SetFileTypes(1, filter);
+		if (SUCCEEDED(hr))
+		{
+			FILEOPENDIALOGOPTIONS opt{};
+			pFileDialog->GetOptions(&opt);
+			pFileDialog->SetOptions(opt | FOS_PATHMUSTEXIST | FOS_FORCEFILESYSTEM);
+
+			if (SUCCEEDED(pFileDialog->Show(static_cast<HWND>(hParentWnd))))
+			{
+				CComPtr<IShellItem> pSelectedItem;
+				pFileDialog->GetResult(&pSelectedItem);
+
+				wchar_t* pPath;
+				pSelectedItem->GetDisplayName(SIGDN_FILESYSPATH, &pPath);
+
+				if (pPath != nullptr)
+				{
+					std::wstring wstrPath = pPath;
+					::CoTaskMemFree(pPath);
+					return wstrPath;
+				}
+			}
+		}
+	}
+
+	return std::wstring();
+}
+
+void win_dialogue::ShowMessageBox(const char* pzTitle, const char* pzMessage)
+{
+	::MessageBoxA(nullptr, pzMessage, pzTitle, MB_ICONERROR);
 }

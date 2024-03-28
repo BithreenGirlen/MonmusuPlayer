@@ -1,4 +1,4 @@
-#ifndef WIN_TEXT_H_
+﻿#ifndef WIN_TEXT_H_
 #define WIN_TEXT_H_
 
 #include <string>
@@ -10,4 +10,3 @@ namespace win_text
 }
 
 #endif //WIN_TEXT_H_
-
