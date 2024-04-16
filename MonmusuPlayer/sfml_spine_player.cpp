@@ -237,34 +237,18 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 /*描画器設定*/
 bool CSfmlSpinePlayer::SetupDrawer()
 {
-	const std::vector<std::string> blendScreenList{ "Breath", "Mist", "Bless", "Eff", "Smoke", "Toiki", "Steam", "Moya", "Yuge", "Sand_", "Bress", "sigh", "Fog", "Spore" };
-	const std::vector<std::string> blendMultiplyList{ "Cheek" };
 	const std::vector<std::string> leaveOutList{ "Mask", "White" };
 
 	for (size_t i = 0; i < m_skeletonData.size(); ++i)
 	{
-		m_drawables.emplace_back(std::make_shared<spine::SkeletonDrawable>(m_skeletonData.at(i).get()));
+		m_drawables.emplace_back(std::make_shared<CSfmlSpineDrawable>(m_skeletonData.at(i).get()));
 
-		spine::SkeletonDrawable* drawable = m_drawables.at(i).get();
+		CSfmlSpineDrawable* drawable = m_drawables.at(i).get();
 		drawable->timeScale = 1.0f;
 		drawable->skeleton->setPosition(m_BaseWindowSize.x / 2, m_BaseWindowSize.y / 2);
 		drawable->skeleton->updateWorldTransform();
 
 		drawable->SetLeaveOutList(leaveOutList);
-		/*合成方法指定。反転合成は透過度に関係なく、乗算合成は透過度を見て変更。*/
-		drawable->SetBlendMultiplyList(blendMultiplyList);
-		auto& slots = m_skeletonData.at(i).get()->getSlots();
-		for (size_t ii = 0; ii < slots.size(); ++ii)
-		{
-			std::string strName = slots[ii]->getName().buffer();
-			for (const std::string& str : blendScreenList)
-			{
-				if (strstr(strName.c_str(), str.c_str()))
-				{
-					slots[ii]->setBlendMode(spine::BlendMode::BlendMode_Screen);
-				}
-			}
-		}
 
 		auto& animations = m_skeletonData.at(i).get()->getAnimations();
 		for (size_t ii = 0; ii < animations.size(); ++ii)
@@ -308,7 +292,7 @@ bool CSfmlSpinePlayer::SetupDrawer()
 	{
 		for (size_t i = 0; i < m_skeletonData.size(); ++i)
 		{
-			spine::SkeletonDrawable* drawable = m_drawables.at(i).get();
+			CSfmlSpineDrawable* drawable = m_drawables.at(i).get();
 			drawable->state->setAnimation(0, m_animationNames.at(0).c_str(), true);
 		}
 	}
@@ -542,7 +526,7 @@ void CSfmlSpinePlayer::Redraw(float fDelta)
 		m_window->clear();
 		for (size_t i = 0; i < m_drawables.size(); ++i)
 		{
-			m_drawables.at(i).get()->update(fDelta);
+			m_drawables.at(i).get()->Update(fDelta);
 			m_window->draw(*m_drawables.at(i).get(), sf::RenderStates(sf::BlendAlpha));
 		}
 		if (!m_bTextHidden)

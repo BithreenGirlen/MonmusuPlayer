@@ -3,10 +3,8 @@
 
 #include <memory>
 
-#include <SFML/Graphics.hpp>
-
 #include "adv.h"
-#include "deps/spine-sfml/spine-sfml.h"
+#include "spine-sfml.h"
 
 /*Windows OS*/
 #include "mf_media_player.h"
@@ -24,10 +22,10 @@ public:
 private:
 	enum Size { kBaseWidth = 1280, kBaseHeight = 700 };
 
-	spine::SFMLTextureLoader m_textureLoader;
+	CSfmlTextureLoader m_textureLoader;
 	std::vector<std::unique_ptr<spine::Atlas>> m_atlases;
 	std::vector<std::shared_ptr<spine::SkeletonData>> m_skeletonData;
-	std::vector<std::shared_ptr<spine::SkeletonDrawable>> m_drawables;
+	std::vector<std::shared_ptr<CSfmlSpineDrawable>> m_drawables;
 
 	std::unique_ptr<sf::RenderWindow> m_window;
 	sf::Vector2f m_BaseWindowSize = sf::Vector2f{ Size::kBaseWidth, Size::kBaseHeight };

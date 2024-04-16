@@ -26,22 +26,21 @@
 ビルドする際は所定の箇所に補って下さい。
   <pre>
     deps
-    ├ SFML-2.6.1 // 上記リンクから取得
+    ├ nlohmann // JSON for Modern C++
+    │   └ json.hpp
+    ├ SFML-2.6.1 // static libraries and headers of SFML
     │   ├ include
     │   │   └ SFML
     │   │       └ ...
     │   └ lib
     │       └ ...
-    ├ spine-cpp // 上記リンクから取得
-    │   ├ include
-    │   │   └ spine
-    │   │       └ ...
-    │   └ src
-    │       └ spine
-    │           └ ...
-    └ spine-sfml // 同梱済み
-        ├ spine-sfml.cpp
-        └ spine-sfml.h
+    └ spine-cpp // sources and headers of spine-cpp 3.8
+        ├ include
+        │   └ spine
+        │       └ ...
+        └ src
+            └ spine
+                └ ...
   </pre>
 
   ## マウス操作
@@ -66,39 +65,7 @@
 | PageDown | 音声減速。 |
 | Home | 音声等倍速。 |  
 ## 補足説明
-### 読み込み処理
-pngの大きさが縦横1024のものと2048のものが混在しており、また、atlasの寸法指定も2048のものと4096のものが混在しているため、`spine-sfml.cpp`に於ける読み込み処理の一部を削除しています。
-```cpp
-void SFMLTextureLoader::load(AtlasPage &page, const String &path) {
-	/*中略*/
-	page.setRendererObject(texture);
-	/*In case atlas size does not coincide with that of png, overwriting will collapse the layout.*/
-	//sf::Vector2u size = texture->getSize();
-	//page.width = size.x;
-	//page.height = size.y;
-}
-```
 
-### 描画
-`sfml_spine_player.cpp`にて描画から除外するスロット、乗算合成・反転合成するスロットを指定しています。  
-但し、乗算合成に関してはアルファ値をみて最終的に適用するか判断します。
-```cpp
-drawable->SetLeaveOutList(leaveOutList);
-drawable->SetBlendMultiplyList(blendMultiplyList);
-
-auto& slots = m_skeletonData.at(i).get()->getSlots();
-for (size_t ii = 0; ii < slots.size(); ++ii)
-{
-	std::string strName = slots[ii]->getName().buffer();
-	for (const std::string& str : blendScreenList)
-	{
-		if (strstr(strName.c_str(), str.c_str()))
-		{
-			slots[ii]->setBlendMode(spine::BlendMode::BlendMode_Screen);
-		}
-	}
-}
-```
 ### 音声再生
 SFMLが`.m4a`ファイルに対応していないため、Microsoft Media Foundationを利用しています。  
 再生するには音声フォルダが選択フォルダに対して次のような位置関係にある必要があります。
@@ -117,7 +84,7 @@ SFMLが`.m4a`ファイルに対応していないため、Microsoft Media Founda
       └ ...   └ r18_10166_2
   </pre>
 ### 文章表示
-選択フォルダに対して脚本ファイルが次のような相対位置のフォルダに存在する場合には文章が表示されます。  
+文章を表示するには脚本フォルダが選択フォルダに対して次のような相対位置にある必要があります。
 __選択フォルダ__  
 `.../advscene/resources/advscene/texture/character/r18_scenes/r18_10166_2`  
 __脚本フォルダ__  
