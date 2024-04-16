@@ -156,7 +156,7 @@
     <ClCompile Include="deps\spine-sfml\spine-sfml.cpp" />
     <ClCompile Include="mf_media_player.cpp" />
     <ClCompile Include="mnms.cpp" />
-    <ClCompile Include="MonmusuPlayer.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="sfml_spine_player.cpp" />
     <ClCompile Include="spine_loader.cpp" />
     <ClCompile Include="win_dialogue.cpp" />
