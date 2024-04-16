@@ -85,11 +85,8 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="mf_media_player.h" />
     <ClInclude Include="mnms.h" />
-    <ClInclude Include="MonmusuPlayer.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="sfml_spine_player.h" />
     <ClInclude Include="spine_loader.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="win_dialogue.h" />
     <ClInclude Include="win_filesystem.h" />
     <ClInclude Include="win_text.h" />
@@ -165,9 +162,6 @@
     <ClCompile Include="win_dialogue.cpp" />
     <ClCompile Include="win_filesystem.cpp" />
     <ClCompile Include="win_text.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="MonmusuPlayer.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
