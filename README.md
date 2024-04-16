@@ -26,22 +26,21 @@
 ビルドする際は所定の箇所に補って下さい。
   <pre>
     deps
-    ├ SFML-2.6.1 // 上記リンクから取得
+    ├ nlohmann // JSON for Modern C++
+    │   └ json.hpp
+    ├ SFML-2.6.1 // static libraries and headers of SFML
     │   ├ include
     │   │   └ SFML
     │   │       └ ...
     │   └ lib
     │       └ ...
-    ├ spine-cpp // 上記リンクから取得
-    │   ├ include
-    │   │   └ spine
-    │   │       └ ...
-    │   └ src
-    │       └ spine
-    │           └ ...
-    └ spine-sfml // 同梱済み
-        ├ spine-sfml.cpp
-        └ spine-sfml.h
+    └ spine-cpp // sources and headers of spine-cpp 3.8
+        ├ include
+        │   └ spine
+        │       └ ...
+        └ src
+            └ spine
+                └ ...
   </pre>
 
   ## マウス操作
@@ -85,7 +84,7 @@ SFMLが`.m4a`ファイルに対応していないため、Microsoft Media Founda
       └ ...   └ r18_10166_2
   </pre>
 ### 文章表示
-選択フォルダに対して脚本ファイルが次のような相対位置のフォルダに存在する場合には文章が表示されます。  
+文章を表示するには脚本フォルダが選択フォルダに対して次のような相対位置にある必要があります。
 __選択フォルダ__  
 `.../advscene/resources/advscene/texture/character/r18_scenes/r18_10166_2`  
 __脚本フォルダ__  
