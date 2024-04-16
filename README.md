@@ -18,7 +18,7 @@
   └ ...
   </pre>
 
-## Libraries
+## 函式庫
 - [SFML-2.6.1](https://www.sfml-dev.org/download/sfml/2.6.1/)
 - [spine-cpp-3.8](https://github.com/EsotericSoftware/spine-runtimes/tree/3.8)
 - [JSON for Modern C++ v3.11.3](https://github.com/nlohmann/json/releases/tag/v3.11.3)
@@ -67,8 +67,8 @@
 ## 補足説明
 
 ### 音声再生
-SFMLが`.m4a`ファイルに対応していないため、Microsoft Media Foundationを利用しています。  
-再生するには音声フォルダが選択フォルダに対して次のような位置関係にある必要があります。
+- SFMLが`.m4a`ファイルに対応していないため、`Microsoft Media Foundation`を利用しています。  
+- 再生するには音声フォルダが選択フォルダに対して次のような位置関係にある必要があります。
 <pre>
   advscene
   ├ sound
@@ -84,12 +84,13 @@ SFMLが`.m4a`ファイルに対応していないため、Microsoft Media Founda
       └ ...   └ r18_10166_2
   </pre>
 ### 文章表示
-文章を表示するには脚本フォルダが選択フォルダに対して次のような相対位置にある必要があります。
+- 文章を表示するには脚本フォルダが選択フォルダに対して次のような相対位置にある必要があります。  
 __選択フォルダ__  
 `.../advscene/resources/advscene/texture/character/r18_scenes/r18_10166_2`  
 __脚本フォルダ__  
 `.../advscene/scenarioexcel/character/10166`  
-文章には通し番号を振ってあります。
+- 文章には通し番号を振ってあります。
+- 音声なしの場合は2秒後に、音声有りの場合は再生終了を待って次の文章に移行します。
 
 ### 立ち絵表示
 次のようなファイル名称であれば表示できます。
