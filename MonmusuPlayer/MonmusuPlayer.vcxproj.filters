@@ -13,17 +13,8 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="ヘッダー ファイル\deps">
-      <UniqueIdentifier>{08879d04-202c-4443-a863-1bd37833dab7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\deps">
       <UniqueIdentifier>{6b50987d-3d51-4f95-99a9-299169f94439}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\deps\spine-sfml">
-      <UniqueIdentifier>{c26b5f5b-be09-4d11-bdd4-eb99eea4941e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\deps\spine-sfml">
-      <UniqueIdentifier>{f147e2f0-4f03-41db-8008-d60f8d54a978}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\deps\spine-cpp">
       <UniqueIdentifier>{14cfe719-9bed-49e3-b1e8-8a4c43972b77}</UniqueIdentifier>
@@ -57,8 +48,8 @@
     <ClInclude Include="spine_loader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="deps\spine-sfml\spine-sfml.h">
-      <Filter>ヘッダー ファイル\deps\spine-sfml</Filter>
+    <ClInclude Include="spine-sfml.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -85,9 +76,6 @@
     </ClCompile>
     <ClCompile Include="spine_loader.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="deps\spine-sfml\spine-sfml.cpp">
-      <Filter>ソース ファイル\deps\spine-sfml</Filter>
     </ClCompile>
     <ClCompile Include="deps\spine-cpp\src\spine\Animation.cpp">
       <Filter>ソース ファイル\deps\spine-cpp</Filter>
@@ -271,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="deps\spine-cpp\src\spine\VertexEffect.cpp">
       <Filter>ソース ファイル\deps\spine-cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="spine-sfml.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
