@@ -209,7 +209,7 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 			break;
 		case spine::BlendMode_Screen:
 			sfmlBlendMode.colorSrcFactor = sf::BlendMode::Factor::One;
-			sfmlBlendMode.colorDstFactor = sf::BlendMode::Factor::OneMinusSrcAlpha;
+			sfmlBlendMode.colorDstFactor = sf::BlendMode::Factor::OneMinusSrcColor;
 			sfmlBlendMode.colorEquation = sf::BlendMode::Equation::Add;
 			sfmlBlendMode.alphaSrcFactor = sf::BlendMode::Factor::OneMinusSrcColor;
 			sfmlBlendMode.alphaDstFactor = sf::BlendMode::Factor::OneMinusSrcColor;
