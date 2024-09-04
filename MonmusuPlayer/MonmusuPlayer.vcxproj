@@ -85,7 +85,7 @@
     <ClInclude Include="mf_media_player.h" />
     <ClInclude Include="mnms.h" />
     <ClInclude Include="sfml_spine_player.h" />
-    <ClInclude Include="spine-sfml.h" />
+    <ClInclude Include="spine_sfml.h" />
     <ClInclude Include="spine_loader.h" />
     <ClInclude Include="win_dialogue.h" />
     <ClInclude Include="win_filesystem.h" />
@@ -157,7 +157,7 @@
     <ClCompile Include="mnms.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sfml_spine_player.cpp" />
-    <ClCompile Include="spine-sfml.cpp" />
+    <ClCompile Include="spine_sfml.cpp" />
     <ClCompile Include="spine_loader.cpp" />
     <ClCompile Include="win_dialogue.cpp" />
     <ClCompile Include="win_filesystem.cpp" />

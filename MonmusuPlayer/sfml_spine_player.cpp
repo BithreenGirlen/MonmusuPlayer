@@ -156,7 +156,7 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 
 					if (iX == 0 && iY == 0)
 					{
-						ShiftScene();
+						ShiftAnimation();
 					}
 					else
 					{
@@ -411,8 +411,8 @@ void CSfmlSpinePlayer::MoveViewPoint(int iX, int iY)
 		m_drawables.at(i).get()->skeleton->setPosition(m_BaseWindowSize .x/ 2 - m_iOffset.x, m_BaseWindowSize.y / 2 - m_iOffset.y);
 	}
 }
-/*ê–ÊˆÚs*/
-void CSfmlSpinePlayer::ShiftScene()
+/*“®ìˆÚs*/
+void CSfmlSpinePlayer::ShiftAnimation()
 {
 	++m_nAnimationIndex;
 	if (m_nAnimationIndex > m_animationNames.size() - 1)m_nAnimationIndex = 0;

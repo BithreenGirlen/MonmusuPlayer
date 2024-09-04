@@ -17,15 +17,19 @@ public:
 	void Update(float fDelta);
 	/*virtual function from sf::Drawable*/
 	virtual void draw(sf::RenderTarget& renderTarget, sf::RenderStates renderStates) const;
-	void SwitchPma()const { m_bAlphaPremultiplied ^= true; };
+
+	void SwitchPma() { m_bAlphaPremultiplied ^= true; };
+	void SwitchBlendModeAdoption() { m_bForceBlendModeNormal ^= true; }
+
 	void SetLeaveOutList(const std::vector<std::string>& list);
 private:
-	mutable bool m_bHasOwnAnimationStateData = false;
-	mutable bool m_bAlphaPremultiplied = true;
+	bool m_bHasOwnAnimationStateData = false;
+	bool m_bAlphaPremultiplied = false;
+	bool m_bForceBlendModeNormal = false;
 
 	mutable spine::Vector<float> m_worldVertices;
 
-	mutable sf::VertexArray sfmlVertices;
+	mutable sf::VertexArray m_sfmlVertices;
 	/*SFML does not have indices.*/
 
 	mutable spine::SkeletonClipping m_clipper;

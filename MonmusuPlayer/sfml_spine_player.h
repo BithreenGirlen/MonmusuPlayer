@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "adv.h"
-#include "spine-sfml.h"
+#include "spine_sfml.h"
 
 /*Windows OS*/
 #include "mf_media_player.h"
@@ -64,7 +64,7 @@ private:
 	void ResizeWindow();
 
 	void MoveViewPoint(int iX, int iY);
-	void ShiftScene();
+	void ShiftAnimation();
 
 	void ShiftSkin(bool bForward);
 	void UpdateSkin();

@@ -1,10 +1,11 @@
 ﻿
 
-#include "spine-sfml.h"
+#include "spine_sfml.h"
 
 namespace spine
 {
-	SpineExtension* getDefaultExtension() {
+	SpineExtension* getDefaultExtension()
+	{
 		return new DefaultSpineExtension();
 	}
 }
@@ -14,7 +15,7 @@ CSfmlSpineDrawable::CSfmlSpineDrawable(spine::SkeletonData* pSkeletonData, spine
 	spine::Bone::setYDown(true);
 
 	/*sf::VertexArray seems not to have reserve-like method.*/
-	sfmlVertices.setPrimitiveType(sf::PrimitiveType::Triangles);
+	m_sfmlVertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 
 	skeleton = new(__FILE__, __LINE__) spine::Skeleton(pSkeletonData);
 
@@ -165,14 +166,11 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 		);
 		sf::Vector2u sfmlSize = pSfmlTexture->getSize();
 
-		sfmlVertices.clear();
+		m_sfmlVertices.clear();
 		/*
-		* SFML does not support indexed drawing.
-		* This requires two tasks to user (namely SFML library user).
-		* 
+		* The two tasks are required because SFML does not support indexed drawing.
 		* 1. Map index to vertex when adding.
 		* 2. Multiply alpha to colours if necessary. 
-		* 
 		*/
 		for (int ii = 0; ii < indicesCount; ++ii)
 		{
@@ -185,11 +183,17 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 			sfmlVertex.color.a = (sf::Uint8)(tint.a * 255.f);
 			sfmlVertex.texCoords.x = (*pAttachmentUvs)[(*pIndices)[ii] * 2LL] * sfmlSize.x;
 			sfmlVertex.texCoords.y = (*pAttachmentUvs)[(*pIndices)[ii] * 2LL + 1] * sfmlSize.y;
-			sfmlVertices.append(sfmlVertex);
+			m_sfmlVertices.append(sfmlVertex);
 		}
 
 		sf::BlendMode sfmlBlendMode;
-		switch (slot.getData().getBlendMode())
+		/*
+		* Some slots specify BlendMode_Multiply though, BlendMode_Normal seems better;
+		* But in order not to overwrite the slot data, copy to temporary variable when forcing.
+		*/
+		spine::BlendMode spineBlnedMode = slot.getData().getBlendMode();
+		if (m_bForceBlendModeNormal)spineBlnedMode = spine::BlendMode_Normal;
+		switch (spineBlnedMode)
 		{
 		case spine::BlendMode_Additive:
 			sfmlBlendMode.colorSrcFactor = m_bAlphaPremultiplied ? sf::BlendMode::Factor::One : sf::BlendMode::Factor::SrcAlpha;
@@ -227,7 +231,7 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 
 		renderStates.blendMode = sfmlBlendMode;
 		renderStates.texture = pSfmlTexture;
-		renderTarget.draw(sfmlVertices, renderStates);
+		renderTarget.draw(m_sfmlVertices, renderStates);
 		m_clipper.clipEnd(slot);
 	}
 	m_clipper.clipEnd();
@@ -253,18 +257,26 @@ bool CSfmlSpineDrawable::IsToBeLeftOut(const spine::String &slotName) const
 	return false;
 }
 
-void CSfmlTextureLoader::load(spine::AtlasPage& page, const spine::String& path) {
+void CSfmlTextureLoader::load(spine::AtlasPage& page, const spine::String& path)
+{
 	sf::Texture* texture = new sf::Texture();
-	if (!texture->loadFromFile(path.buffer())) return;
+	if (!texture->loadFromFile(path.buffer()))
+	{
+		delete texture;
+		return;
+	}
 
 	if (page.magFilter == spine::TextureFilter_Linear) texture->setSmooth(true);
 	if (page.uWrap == spine::TextureWrap_Repeat && page.vWrap == spine::TextureWrap_Repeat) texture->setRepeated(true);
 
 	page.setRendererObject(texture);
 	/*In case atlas size does not coincide with that of png, overwriting will collapse the layout.*/
-	//sf::Vector2u size = texture->getSize();
-	//page.width = size.x;
-	//page.height = size.y;
+	if (page.width == 0 || page.height == 0)
+	{
+		sf::Vector2u size = texture->getSize();
+		page.width = size.x;
+		page.height = size.y;
+	}
 }
 
 void CSfmlTextureLoader::unload(void* texture)

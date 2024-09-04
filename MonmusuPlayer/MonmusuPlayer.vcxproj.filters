@@ -48,7 +48,7 @@
     <ClInclude Include="spine_loader.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="spine-sfml.h">
+    <ClInclude Include="spine_sfml.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -260,7 +260,7 @@
     <ClCompile Include="deps\spine-cpp\src\spine\VertexEffect.cpp">
       <Filter>ソース ファイル\deps\spine-cpp</Filter>
     </ClCompile>
-    <ClCompile Include="spine-sfml.cpp">
+    <ClCompile Include="spine_sfml.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
