@@ -50,11 +50,11 @@ void mnms::GetSpineList(const std::wstring& wstrFolderPath, std::vector<std::str
          *---------------------*/
         if (filePath.rfind(L".atlas") != std::wstring::npos)
         {
-            atlasPaths.push_back(win_text::NarrowUtf8(filePath));
+            atlasPaths.push_back(win_text::NarrowANSI(filePath));
         }
         else
         {
-            skelPaths.push_back(win_text::NarrowUtf8(filePath));
+            skelPaths.push_back(win_text::NarrowANSI(filePath));
         }
     }
 }
@@ -112,6 +112,9 @@ bool mnms::DeriveAudioFolderPathFromSpineFolderPath(const std::wstring& wstrAtla
             break;
         case L'3':
             wstrCharacterVoiceFolder += L"e1";
+            break;
+        case L'4':
+            wstrCharacterVoiceFolder += L"f1";
             break;
         }
     }
@@ -183,6 +186,9 @@ bool mnms::DeriveEpisodeJsonPathFromSpineFolderPath(const std::wstring& wstrAtla
             break;
         case L'3':
             wstrBookJson += L"e1";
+            break;
+        case L'4':
+            wstrBookJson += L"f1";
             break;
         }
     }
