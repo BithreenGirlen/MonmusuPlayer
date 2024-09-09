@@ -24,7 +24,7 @@ public:
 	void SetLeaveOutList(const std::vector<std::string>& list);
 private:
 	bool m_bHasOwnAnimationStateData = false;
-	bool m_bAlphaPremultiplied = false;
+	bool m_bAlphaPremultiplied = true;
 	bool m_bForceBlendModeNormal = false;
 
 	mutable spine::Vector<float> m_worldVertices;

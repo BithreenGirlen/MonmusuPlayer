@@ -186,6 +186,18 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 			case sf::Event::KeyReleased:
 				switch (event.key.code)
 				{
+				case sf::Keyboard::Key::A:
+					for (const auto& pDrawble : m_drawables)
+					{
+						pDrawble->SwitchPma();
+					}
+					break;
+				case sf::Keyboard::Key::B:
+					for (const auto& pDrawble : m_drawables)
+					{
+						pDrawble->SwitchBlendModeAdoption();
+					}
+					break;
 				case sf::Keyboard::Key::C:
 					SwitchTextColor();
 					break;
@@ -506,7 +518,7 @@ void CSfmlSpinePlayer::UpdateMessageText()
 	if (m_textData.empty())return;
 
 	const adv::TextDatum& textDatum = m_textData.at(m_nTextIndex);
-	std::wstring wstr = textDatum.wstrText + L"\r\n " + std::to_wstring(m_nTextIndex + 1) + L"/" + std::to_wstring(m_textData.size());
+	std::wstring wstr = textDatum.wstrText + L"\n " + std::to_wstring(m_nTextIndex + 1) + L"/" + std::to_wstring(m_textData.size());
 	m_msgText.setString(wstr);
 
 	if (!textDatum.wstrVoicePath.empty())
