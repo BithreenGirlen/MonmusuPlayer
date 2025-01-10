@@ -86,6 +86,32 @@ namespace mnms
 
         return g_wstrVoiceFolderPath + wstr + g_playerSetting.wstrVoiceExtension;
     }
+
+    static void EliminateTag(std::wstring& wstr)
+    {
+        std::wstring wstrResult;
+        wstrResult.reserve(wstr.size());
+        int iCount = 0;
+        for (const auto& c : wstr)
+        {
+            if (c == L'<')
+            {
+                ++iCount;
+                continue;
+            }
+            else if (c == L'>')
+            {
+                --iCount;
+                continue;
+            }
+
+            if (iCount == 0)
+            {
+                wstrResult.push_back(c);
+            }
+        }
+        wstr = wstrResult;
+    }
 }
 
 bool mnms::InitialiseSetting()
@@ -315,24 +341,34 @@ bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::T
 
             const nlohmann::json& jData = nlJson.at("importGridList").at(0).at("rows");
 
-            for (size_t i = 0; i < jData.size(); ++i)
+            /*€–Ú–¼‚Í”ò‚Î‚·*/
+            for (size_t i = 1; i < jData.size(); ++i)
             {
                 const nlohmann::json& jRow = jData.at(i).at("strings");
 
                 if (jRow.size() > 9)
                 {
                     adv::TextDatum t;
-                    const std::string strMsg = std::string(jRow.at(9));
-                    if (strMsg != "Text")
+
+                    const std::string strMsg = std::string(jRow[9]);
+                    if (strMsg.empty())continue;
+
+                    t.wstrText.reserve(128);
+                    const std::string strName = std::string(jRow[2]);
+                    if (!strName.empty())
                     {
-                        t.wstrText = win_text::WidenUtf8(strMsg);
-                        if (jRow.size() > 11)
+                        t.wstrText = win_text::WidenUtf8(strName);
+                        t.wstrText += L":\n";
+                    }
+                    t.wstrText += win_text::WidenUtf8(strMsg);
+                    EliminateTag(t.wstrText);
+
+                    if (jRow.size() > 11)
+                    {
+                        const std::string strVoicePath = std::string(jRow[11]);
+                        if (!strVoicePath.empty())
                         {
-                            const std::string strVoicePath = std::string(jRow.at(11));
-                            if (!strVoicePath.empty())
-                            {
-                                t.wstrVoicePath = VoiceRelativeUrlToFilePath(win_text::WidenUtf8(strVoicePath));
-                            }
+                            t.wstrVoicePath = VoiceRelativeUrlToFilePath(win_text::WidenUtf8(strVoicePath));
                         }
                     }
 
