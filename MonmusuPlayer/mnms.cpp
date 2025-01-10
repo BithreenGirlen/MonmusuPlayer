@@ -11,6 +11,56 @@
 
 namespace mnms
 {
+    struct SPlayerSetting
+    {
+        std::wstring wstrAtlasExtension = L".atlas.txt";
+        std::wstring wstrSkelExtension = L".skel.txt";
+        std::wstring wstrVoiceExtension = L".m4a";;
+        std::wstring wstrSceneTextExtension = L".json";
+        std::string strFontFilePath = "C:\\Windows\\Fonts\\yumindb.ttf";
+    };
+
+    static SPlayerSetting g_playerSetting;
+
+    static bool ReadSettingFile(SPlayerSetting& playerSetting)
+    {
+        std::wstring wstrFilePath = win_filesystem::GetCurrentProcessPath() + L"\\setting.txt";
+        std::string strFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
+        if (strFile.empty())return false;
+
+        std::string strError;
+
+        try
+        {
+            nlohmann::json nlJson = nlohmann::json::parse(strFile);
+            std::string str;
+
+            nlohmann::json& jExtension = nlJson.at("extensions");
+
+            str = std::string(jExtension.at("atlas"));
+            playerSetting.wstrAtlasExtension = win_text::WidenUtf8(str);
+
+            str = std::string(jExtension.at("skel"));
+            playerSetting.wstrSkelExtension = win_text::WidenUtf8(str);
+
+            str = std::string(jExtension.at("voice"));
+            playerSetting.wstrVoiceExtension = win_text::WidenUtf8(str);
+
+            str = std::string(jExtension.at("sceneText"));
+            playerSetting.wstrSceneTextExtension = win_text::WidenUtf8(str);
+
+            playerSetting.strFontFilePath = nlJson.at("fontPath");
+
+        }
+        catch (nlohmann::json::exception e)
+        {
+            strError = e.what();
+            ::MessageBoxA(nullptr, strError.c_str(), "Setting error", MB_ICONERROR);
+        }
+
+        return strError.empty();
+    }
+
     std::wstring g_wstrVoiceFolderPath;
 
     bool SetVoiceFolderPath(const std::wstring& wstrScenarioFiLePath)
@@ -34,28 +84,71 @@ namespace mnms
             wstr.replace(nPos, 1, L"\\");
         }
 
-        return g_wstrVoiceFolderPath + wstr + L".m4a";
+        return g_wstrVoiceFolderPath + wstr + g_playerSetting.wstrVoiceExtension;
     }
 }
+
+bool mnms::InitialiseSetting()
+{
+    SPlayerSetting playerSetting;
+    bool bRet = ReadSettingFile(playerSetting);
+    if (bRet)
+    {
+        g_playerSetting = std::move(playerSetting);
+    }
+
+    return g_playerSetting.wstrAtlasExtension != g_playerSetting.wstrSkelExtension;
+}
+
+const std::string& mnms::GetFontFilePath()
+{
+    return g_playerSetting.strFontFilePath;
+}
+
+const bool mnms::IsSkelBinary()
+{
+    const wchar_t* wszBinaryCandidates[] =
+    {
+        L".skel", L".bin"
+    };
+    for (size_t i = 0; i < sizeof(wszBinaryCandidates) / sizeof(wszBinaryCandidates[0]); ++i)
+    {
+        if (g_playerSetting.wstrSkelExtension.find(wszBinaryCandidates[i]) != std::wstring::npos)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+/*•`‰æ‘fÞˆê——Žæ“¾*/
 void mnms::GetSpineList(const std::wstring& wstrFolderPath, std::vector<std::string>& atlasPaths, std::vector<std::string>& skelPaths)
 {
-    std::vector<std::wstring> filePaths;
-    win_filesystem::CreateFilePathList(wstrFolderPath.c_str(), L".txt", filePaths);
-    for (const std::wstring& filePath : filePaths)
+    bool bAtlasLonger = g_playerSetting.wstrAtlasExtension.size() > g_playerSetting.wstrSkelExtension.size();
+
+    std::wstring& wstrLongerExtesion = bAtlasLonger ? g_playerSetting.wstrAtlasExtension : g_playerSetting.wstrSkelExtension;
+    std::wstring& wstrShorterExtension = bAtlasLonger ? g_playerSetting.wstrSkelExtension : g_playerSetting.wstrAtlasExtension;
+    std::vector<std::string>& strLongerPaths = bAtlasLonger ? atlasPaths : skelPaths;
+    std::vector<std::string>& strShorterPaths = bAtlasLonger ? skelPaths : atlasPaths;
+
+    std::vector<std::wstring> wstrFilePaths;
+    win_filesystem::CreateFilePathList(wstrFolderPath.c_str(), L"*", wstrFilePaths);
+
+    for (const auto& filePath : wstrFilePaths)
     {
-        /*---------------------
-         * Ží—Þ  | –¼Ì
-         * atlas | xx.atlas.txt
-         * skel  | xx.skel.txt
-         * json  | xx.txt
-         *---------------------*/
-        if (filePath.rfind(L".atlas") != std::wstring::npos)
+        const auto EndsWith = [&filePath](const std::wstring& str)
+            -> bool
+            {
+                if (filePath.size() < str.size()) return false;
+                return std::equal(str.rbegin(), str.rend(), filePath.rbegin());
+            };
+
+        if (EndsWith(wstrLongerExtesion))
         {
-            atlasPaths.push_back(win_text::NarrowANSI(filePath));
+            strLongerPaths.push_back(win_text::NarrowUtf8(filePath));
         }
-        else
+        else if (EndsWith(wstrShorterExtension))
         {
-            skelPaths.push_back(win_text::NarrowANSI(filePath));
+            strShorterPaths.push_back(win_text::NarrowUtf8(filePath));
         }
     }
 }
@@ -197,7 +290,8 @@ bool mnms::DeriveEpisodeJsonPathFromSpineFolderPath(const std::wstring& wstrAtla
     {
         wstrBookJson += wstrCurrent.back() == L'1' ? L"a1" : L"b1";
     }
-    wstrBookJson += L"_R18.book.json";
+    wstrBookJson += L"_R18.book";
+    wstrBookJson += g_playerSetting.wstrSceneTextExtension;
 
     wstrEpisodeJsonFilePath = wstrBookJson;
 
@@ -261,5 +355,36 @@ bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::T
         }
     }
 
+    if (textData.empty())
+    {
+        /*‘ä–{‚È‚µE“Ç‚ÝŽæ‚èŽ¸”s*/
+        std::wstring wstrAudioFolderPath;
+        mnms::DeriveAudioFolderPathFromSpineFolderPath(wstrFilePath, wstrAudioFolderPath);
+
+        std::vector<std::wstring> audioFilePaths;
+        win_filesystem::CreateFilePathList(wstrAudioFolderPath.c_str(), g_playerSetting.wstrVoiceExtension.c_str(), audioFilePaths);
+
+        for (size_t i = 0; i < audioFilePaths.size(); ++i)
+        {
+            textData.push_back(adv::TextDatum{ L"", audioFilePaths.at(i) });
+        }
+    }
+
     return !textData.empty();
+}
+/*•`‰æœŠO”»’èŠÖ”*/
+bool mnms::IsSlotToBeLeftOut(const char* szSlotName, size_t nSlotNameLength)
+{
+    const char* szExclusionList[] = { "Mask", "White" };
+    if (szSlotName != nullptr)
+    {
+        for (size_t i = 0; i < sizeof(szExclusionList) / sizeof(szExclusionList[0]); ++i)
+        {
+            if (strstr(szSlotName, szExclusionList[i]) != nullptr)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }

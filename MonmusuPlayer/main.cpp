@@ -1,9 +1,10 @@
 ﻿
-
 #include <SDKDDKVer.h>
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+
+#include <locale.h>
 
 /*SFML*/
 #pragma comment(lib, "opengl32.lib")
@@ -30,12 +31,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+    setlocale(LC_ALL, ".utf8");
+
+    if (!mnms::InitialiseSetting())return 0;
 
     std::wstring wstrPickedFolder = win_dialogue::SelectWorkFolder(nullptr);
     if (!wstrPickedFolder.empty())
     {
+        CSfmlSpinePlayer SfmlPlayer;
+        SfmlPlayer.SetFont(mnms::GetFontFilePath(), true, true);
+
         std::vector<std::wstring> folders;
         size_t nFolderIndex = 0;
         win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, nullptr, folders, &nFolderIndex);
@@ -55,46 +60,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 mnms::ReadScenarioFile(wstrBookPath, textData);
             }
-            if (textData.empty())
+
+            bool bRet = SfmlPlayer.SetSpineFromFile(atlasPaths, skelPaths, mnms::IsSkelBinary());
+            if (!bRet)break;
+
+            SfmlPlayer.SetTexts(textData);
+            SfmlPlayer.SetSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
+
+            int iRet = SfmlPlayer.Display(L"Monmusu Player");
+            if (iRet == 1)
             {
-                /*.jsonなし・読み取り失敗*/
-                std::wstring wstrAudioFolderPath;
-                mnms::DeriveAudioFolderPathFromSpineFolderPath(wstrFolderPath, wstrAudioFolderPath);
-
-                std::vector<std::wstring> audioFilePaths;
-                win_filesystem::CreateFilePathList(wstrAudioFolderPath.c_str(), L".m4a", audioFilePaths);
-
-                for (size_t i = 0; i < audioFilePaths.size(); ++i)
-                {
-                    textData.push_back(adv::TextDatum{ L"", audioFilePaths.at(i) });
-                }
+                ++nFolderIndex;
+                if (nFolderIndex >= folders.size())nFolderIndex = 0;
             }
-
-            CSfmlSpinePlayer SfmlPlayer;
-            bool bRet = SfmlPlayer.SetSpineFromFile(atlasPaths, skelPaths, skelPaths.at(0).rfind(".skel") != std::string::npos);
-            if (bRet)
+            else if (iRet == 2)
             {
-                if (!textData.empty())
-                {
-                    SfmlPlayer.SetFont("C:\\Windows\\Fonts\\yumindb.ttf", true, true);
-                    SfmlPlayer.SetTexts(textData);
-                }
-
-                int iRet = SfmlPlayer.Display(L"Monmusu Player");
-                if (iRet == 1)
-                {
-                    ++nFolderIndex;
-                    if (nFolderIndex > folders.size() - 1)nFolderIndex = 0;
-                }
-                else if (iRet == 2)
-                {
-                    --nFolderIndex;
-                    if (nFolderIndex > folders.size() - 1)nFolderIndex = folders.size() - 1;
-                }
-                else
-                {
-                    break;
-                }
+                --nFolderIndex;
+                if (nFolderIndex >= folders.size())nFolderIndex = folders.size() - 1;
             }
             else
             {
