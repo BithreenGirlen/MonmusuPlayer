@@ -15,6 +15,7 @@ CSfmlSpinePlayer::~CSfmlSpinePlayer()
 bool CSfmlSpinePlayer::SetSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool bIsBinary)
 {
 	if (atlasPaths.size() != skelPaths.size())return false;
+	ClearDrawables();
 
 	for (size_t i = 0; i < atlasPaths.size(); ++i)
 	{
@@ -31,8 +32,8 @@ bool CSfmlSpinePlayer::SetSpineFromFile(const std::vector<std::string>& atlasPat
 
 	if (m_skeletonData.empty())return false;
 
-	m_BaseWindowSize.x = m_skeletonData.at(0).get()->getWidth();
-	m_BaseWindowSize.y = m_skeletonData.at(0).get()->getHeight();
+	m_fBaseSize.x = m_skeletonData.at(0).get()->getWidth();
+	m_fBaseSize.y = m_skeletonData.at(0).get()->getHeight();
 
 	WorkOutDefaultScale();
 
@@ -59,8 +60,8 @@ bool CSfmlSpinePlayer::SetSpineFromMemory(const std::vector<std::string>& atlasD
 
 	if (m_skeletonData.empty())return false;
 
-	m_BaseWindowSize.x = m_skeletonData.at(0).get()->getWidth();
-	m_BaseWindowSize.y = m_skeletonData.at(0).get()->getHeight();
+	m_fBaseSize.x = m_skeletonData.at(0).get()->getWidth();
+	m_fBaseSize.y = m_skeletonData.at(0).get()->getHeight();
 
 	WorkOutDefaultScale();
 
@@ -87,6 +88,8 @@ bool CSfmlSpinePlayer::SetFont(const std::string& strFilePath, bool bBold, bool 
 void CSfmlSpinePlayer::SetTexts(const std::vector<adv::TextDatum>& textData)
 {
 	m_textData = textData;
+	m_nTextIndex = 0;
+	m_msgText.setString("");
 
 	const auto HasAudio = [](const adv::TextDatum& text)
 		-> bool
@@ -97,6 +100,28 @@ void CSfmlSpinePlayer::SetTexts(const std::vector<adv::TextDatum>& textData)
 	if (iter != m_textData.cend())
 	{
 		m_pAudioPlayer = std::make_unique<CMfMediaPlayer>();
+	}
+}
+/*ï`âÊèúäOÉäÉXÉgê›íË*/
+void CSfmlSpinePlayer::SetSlotsToExclude(const std::vector<std::string>& slotNames)
+{
+	spine::Vector<spine::String> leaveOutList;
+	for (const auto& slotName : slotNames)
+	{
+		leaveOutList.add(slotName.c_str());
+	}
+
+	for (size_t i = 0; i < m_drawables.size(); ++i)
+	{
+		m_drawables.at(i).get()->SetLeaveOutList(leaveOutList);
+	}
+}
+/*ï`âÊèúäOä÷êîìoò^*/
+void CSfmlSpinePlayer::SetSlotExclusionCallback(bool(*pFunc)(const char*, size_t))
+{
+	for (const auto& pDrawable : m_drawables)
+	{
+		pDrawable->SetLeaveOutCallback(pFunc);
 	}
 }
 /*ÉEÉBÉìÉhÉEï\é¶*/
@@ -111,7 +136,7 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 
 	UpdateMessageText();
 
-	m_window = std::make_unique< sf::RenderWindow>(sf::VideoMode(static_cast<unsigned int>(m_BaseWindowSize.x), static_cast<unsigned int>(m_BaseWindowSize.y)), pwzWindowName, sf::Style::None);
+	m_window = std::make_unique< sf::RenderWindow>(sf::VideoMode(static_cast<unsigned int>(m_fBaseSize.x), static_cast<unsigned int>(m_fBaseSize.y)), pwzWindowName, sf::Style::None);
 	m_window->setPosition(sf::Vector2i(0, 0));
 	m_window->setFramerateLimit(0);
 	ResetScale();
@@ -214,7 +239,7 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 					ChangePlaybackRate(false);
 					break;
 				case sf::Keyboard::Key::Home:
-					ResetPlacybackRate();
+					ResetPlaybackRate();
 					break;
 				case sf::Keyboard::Key::Up:
 					iRet = 2;
@@ -246,21 +271,33 @@ int CSfmlSpinePlayer::Display(const wchar_t* pwzWindowName)
 	}
 	return iRet;
 }
+
+void CSfmlSpinePlayer::ClearDrawables()
+{
+	m_drawables.clear();
+	m_atlases.clear();
+	m_skeletonData.clear();
+
+	m_animationNames.clear();
+	m_nAnimationIndex = 0;
+
+	m_skinNames.clear();
+	m_nSkinIndex = 0;
+
+	m_textData.clear();
+	m_nTextIndex = 0;
+}
 /*ï`âÊäÌê›íË*/
 bool CSfmlSpinePlayer::SetupDrawer()
 {
-	const std::vector<std::string> leaveOutList{ "Mask", "White" };
-
 	for (size_t i = 0; i < m_skeletonData.size(); ++i)
 	{
-		m_drawables.emplace_back(std::make_shared<CSfmlSpineDrawable>(m_skeletonData.at(i).get()));
+		m_drawables.emplace_back(std::make_shared<CSfmlSpineDrawer>(m_skeletonData.at(i).get()));
 
-		CSfmlSpineDrawable* drawable = m_drawables.at(i).get();
+		auto* drawable = m_drawables.at(i).get();
 		drawable->timeScale = 1.0f;
-		drawable->skeleton->setPosition(m_BaseWindowSize.x / 2, m_BaseWindowSize.y / 2);
+		drawable->skeleton->setPosition(m_fBaseSize.x / 2, m_fBaseSize.y / 2);
 		drawable->skeleton->updateWorldTransform();
-
-		drawable->SetLeaveOutList(leaveOutList);
 
 		auto& animations = m_skeletonData.at(i).get()->getAnimations();
 		for (size_t ii = 0; ii < animations.size(); ++ii)
@@ -300,14 +337,7 @@ bool CSfmlSpinePlayer::SetupDrawer()
 		m_animationNames = fixedNames;
 	}
 
-	if (!m_animationNames.empty())
-	{
-		for (size_t i = 0; i < m_skeletonData.size(); ++i)
-		{
-			CSfmlSpineDrawable* drawable = m_drawables.at(i).get();
-			drawable->state->setAnimation(0, m_animationNames.at(0).c_str(), true);
-		}
-	}
+	UpdateAnimation();
 
 	return m_animationNames.size() > 0;
 }
@@ -326,15 +356,15 @@ void CSfmlSpinePlayer::WorkOutDefaultScale()
 	{
 		if (uiDesktopWidth > uiDesktopHeight)
 		{
-			m_fDefaultWindowScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
+			m_fDefaultScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
 			m_fThresholdScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
 		}
 		else
 		{
-			m_fDefaultWindowScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
+			m_fDefaultScale = static_cast<float>(uiDesktopWidth) / uiSkeletonWidth;
 			m_fThresholdScale = static_cast<float>(uiDesktopHeight) / uiSkeletonHeight;
 		}
-		m_fSkeletonScale = m_fDefaultWindowScale;
+		m_fSkeletonScale = m_fDefaultScale;
 	}
 }
 /*ägèkïœçX*/
@@ -378,8 +408,8 @@ void CSfmlSpinePlayer::UpdateScaletonScale()
 		m_drawables.at(i).get()->skeleton->setScaleY(m_fSkeletonScale > 0.99f + fOffset ? m_fSkeletonScale : 1.f + fOffset);
 	}
 
-	unsigned int uiWindowWidthMax = static_cast<unsigned int>(m_BaseWindowSize.x * (m_fSkeletonScale - m_kfScalePortion));
-	unsigned int uiWindowHeightMax = static_cast<unsigned int>(m_BaseWindowSize.y * (m_fSkeletonScale - m_kfScalePortion));
+	unsigned int uiWindowWidthMax = static_cast<unsigned int>(m_fBaseSize.x * (m_fSkeletonScale - m_kfScalePortion));
+	unsigned int uiWindowHeightMax = static_cast<unsigned int>(m_fBaseSize.y * (m_fSkeletonScale - m_kfScalePortion));
 	if (uiWindowWidthMax < sf::VideoMode::getDesktopMode().width || uiWindowHeightMax < sf::VideoMode::getDesktopMode().height)
 	{
 		ResizeWindow();
@@ -397,7 +427,7 @@ void CSfmlSpinePlayer::UpdateTimeScale()
 void CSfmlSpinePlayer::ResetScale()
 {
 	m_fTimeScale = 1.0f;
-	m_fSkeletonScale = m_fDefaultWindowScale;
+	m_fSkeletonScale = m_fDefaultScale;
 	m_iOffset = sf::Vector2i{};
 
 	UpdateScaletonScale();
@@ -410,7 +440,7 @@ void CSfmlSpinePlayer::ResizeWindow()
 {
 	if (m_window.get() != nullptr)
 	{
-		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(m_BaseWindowSize.x * m_fSkeletonScale), static_cast<unsigned int>(m_BaseWindowSize.y * m_fSkeletonScale)));
+		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(m_fBaseSize.x * m_fSkeletonScale), static_cast<unsigned int>(m_fBaseSize.y * m_fSkeletonScale)));
 	}
 }
 /*éãì_à⁄ìÆ*/
@@ -420,17 +450,31 @@ void CSfmlSpinePlayer::MoveViewPoint(int iX, int iY)
 	m_iOffset.y += iY;
 	for (size_t i = 0; i < m_drawables.size(); ++i)
 	{
-		m_drawables.at(i).get()->skeleton->setPosition(m_BaseWindowSize .x/ 2 - m_iOffset.x, m_BaseWindowSize.y / 2 - m_iOffset.y);
+		m_drawables.at(i).get()->skeleton->setPosition(m_fBaseSize .x/ 2 - m_iOffset.x, m_fBaseSize.y / 2 - m_iOffset.y);
 	}
 }
 /*ìÆçÏà⁄çs*/
 void CSfmlSpinePlayer::ShiftAnimation()
 {
 	++m_nAnimationIndex;
-	if (m_nAnimationIndex > m_animationNames.size() - 1)m_nAnimationIndex = 0;
+	if (m_nAnimationIndex >= m_animationNames.size())m_nAnimationIndex = 0;
 	for (size_t i = 0; i < m_drawables.size(); ++i)
 	{
-		m_drawables.at(i).get()->state->setAnimation(0, m_animationNames.at(m_nAnimationIndex).c_str(), true);
+		m_drawables.at(i).get()->animationState->setAnimation(0, m_animationNames.at(m_nAnimationIndex).c_str(), true);
+	}
+}
+/*ìÆçÏìKóp*/
+void CSfmlSpinePlayer::UpdateAnimation()
+{
+	if (m_nAnimationIndex >= m_animationNames.size())return;
+
+	for (size_t i = 0; i < m_drawables.size(); ++i)
+	{
+		spine::Animation* animation = m_skeletonData.at(i).get()->findAnimation(m_animationNames.at(m_nAnimationIndex).c_str());
+		if (animation != nullptr)
+		{
+			m_drawables.at(i).get()->animationState->setAnimation(0, animation->getName(), true);
+		}
 	}
 }
 
@@ -444,7 +488,7 @@ void CSfmlSpinePlayer::ShiftSkin(bool bForward)
 	{
 		--m_nSkinIndex;
 	}
-	if (m_nSkinIndex > m_skinNames.size() - 1)m_nSkinIndex = 0;
+	if (m_nSkinIndex >= m_skinNames.size())m_nSkinIndex = 0;
 	UpdateSkin();
 }
 
@@ -484,7 +528,7 @@ void CSfmlSpinePlayer::AdjustTextPosition()
 void CSfmlSpinePlayer::CheckTimer()
 {
 	constexpr float fAutoPlayInterval = 2.f;
-	float fSecond = m_clock.getElapsedTime().asSeconds();
+	float fSecond = m_textClock.getElapsedTime().asSeconds();
 	if (m_pAudioPlayer.get() != nullptr && m_pAudioPlayer.get()->IsEnded() && fSecond > fAutoPlayInterval)
 	{
 		if (m_nTextIndex < m_textData.size() - 1)
@@ -493,7 +537,7 @@ void CSfmlSpinePlayer::CheckTimer()
 		}
 		else
 		{
-			m_clock.restart();
+			m_textClock.restart();
 		}
 	}
 }
@@ -528,7 +572,7 @@ void CSfmlSpinePlayer::UpdateMessageText()
 			m_pAudioPlayer->Play(textDatum.wstrVoicePath.c_str());
 		}
 	}
-	m_clock.restart();
+	m_textClock.restart();
 }
 /*çƒï`âÊ*/
 void CSfmlSpinePlayer::Redraw(float fDelta)
@@ -568,7 +612,7 @@ void CSfmlSpinePlayer::ChangePlaybackRate(bool bFaster)
 	}
 }
 
-void CSfmlSpinePlayer::ResetPlacybackRate()
+void CSfmlSpinePlayer::ResetPlaybackRate()
 {
 	if (m_pAudioPlayer.get() != nullptr)
 	{

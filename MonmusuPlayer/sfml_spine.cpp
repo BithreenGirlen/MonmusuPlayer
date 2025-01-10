@@ -1,16 +1,17 @@
 ﻿
 
-#include "spine_sfml.h"
+#include "sfml_spine.h"
 
 namespace spine
 {
+	/* When will this be deleted? */
 	SpineExtension* getDefaultExtension()
 	{
 		return new DefaultSpineExtension();
 	}
 }
 
-CSfmlSpineDrawable::CSfmlSpineDrawable(spine::SkeletonData* pSkeletonData, spine::AnimationStateData* pAnimationStateData)
+CSfmlSpineDrawer::CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData, spine::AnimationStateData* pAnimationStateData)
 {
 	spine::Bone::setYDown(true);
 
@@ -25,7 +26,7 @@ CSfmlSpineDrawable::CSfmlSpineDrawable(spine::SkeletonData* pSkeletonData, spine
 		m_bHasOwnAnimationStateData = true;
 	}
 
-	state = new(__FILE__, __LINE__) spine::AnimationState(pAnimationStateData);
+	animationState = new(__FILE__, __LINE__) spine::AnimationState(pAnimationStateData);
 
 	m_quadIndices.add(0);
 	m_quadIndices.add(1);
@@ -33,18 +34,31 @@ CSfmlSpineDrawable::CSfmlSpineDrawable(spine::SkeletonData* pSkeletonData, spine
 	m_quadIndices.add(2);
 	m_quadIndices.add(3);
 	m_quadIndices.add(0);
+
+	m_sfmlBlendModeNormalPma = sf::BlendMode(sf::BlendMode::One, sf::BlendMode::OneMinusSrcAlpha);
+	m_sfmlBlendModeAddPma = sf::BlendMode(sf::BlendMode::One, sf::BlendMode::One);
+	m_sfmlBlendModeScreen = sf::BlendMode(sf::BlendMode::One, sf::BlendMode::OneMinusSrcColor);
+	m_sfmlBlendModeMultiply = sf::BlendMode
+	(
+		sf::BlendMode::Factor::DstColor,
+		sf::BlendMode::Factor::OneMinusSrcAlpha,
+		sf::BlendMode::Equation::Add,
+		sf::BlendMode::Factor::Zero,
+		sf::BlendMode::Factor::One,
+		sf::BlendMode::Equation::Add
+	);
 }
 
-CSfmlSpineDrawable::~CSfmlSpineDrawable()
+CSfmlSpineDrawer::~CSfmlSpineDrawer()
 {
-	if (state != nullptr)
+	if (animationState != nullptr)
 	{
 		if (m_bHasOwnAnimationStateData)
 		{
-			delete state->getData();
+			delete animationState->getData();
 		}
 
-		delete state;
+		delete animationState;
 	}
 	if (skeleton != nullptr)
 	{
@@ -52,20 +66,22 @@ CSfmlSpineDrawable::~CSfmlSpineDrawable()
 	}
 }
 
-void CSfmlSpineDrawable::Update(float fDelta)
+void CSfmlSpineDrawer::Update(float fDelta)
 {
-	if (skeleton != nullptr && state != nullptr)
+	if (skeleton != nullptr && animationState != nullptr)
 	{
+#ifndef SPINE_4_1_OR_LATER
 		skeleton->update(fDelta);
-		state->update(fDelta * timeScale);
-		state->apply(*skeleton);
+#endif
+		animationState->update(fDelta * timeScale);
+		animationState->apply(*skeleton);
 		skeleton->updateWorldTransform();
 	}
 }
 
-void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates renderStates) const
+void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates renderStates) const
 {
-	if (skeleton == nullptr || state == nullptr)return;
+	if (skeleton == nullptr || animationState == nullptr)return;
 
 	if (skeleton->getColor().a == 0) return;
 
@@ -87,11 +103,8 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 		}
 
 		spine::Vector<float>* pVertices = &m_worldVertices;
-		int verticesCount = 0;
 		spine::Vector<float>* pAttachmentUvs = nullptr;
-
 		spine::Vector<unsigned short>* pIndices = nullptr;
-		int indicesCount = 0;
 
 		spine::Color* pAttachmentColor = nullptr;
 
@@ -107,16 +120,22 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 				m_clipper.clipEnd(slot);
 				continue;
 			}
-			/*Fetch texture handle stored in AltasPage*/
-			pSfmlTexture = (sf::Texture*)((spine::AtlasRegion*)pRegionAttachment->getRendererObject())->page->getRendererObject();
 
 			m_worldVertices.setSize(8, 0);
-			/*Depends on spine's version whether the first argument is slot or bone.*/
+#ifdef SPINE_4_1_OR_LATER
+			pRegionAttachment->computeWorldVertices(slot, m_worldVertices, 0, 2);
+#else
 			pRegionAttachment->computeWorldVertices(slot.getBone(), m_worldVertices, 0, 2);
-			verticesCount = 4;
+#endif
 			pAttachmentUvs = &pRegionAttachment->getUVs();
 			pIndices = &m_quadIndices;
-			indicesCount = 6;
+
+			/*Fetch texture handle stored in AltasPage*/
+#ifdef SPINE_4_1_OR_LATER
+			pSfmlTexture = (sf::Texture*)((spine::AtlasRegion*)pRegionAttachment->getRegion())->rendererObject;
+#else
+			pSfmlTexture = (sf::Texture*)((spine::AtlasRegion*)pRegionAttachment->getRendererObject())->page->getRendererObject();
+#endif
 		}
 		else if (pAttachment->getRTTI().isExactly(spine::MeshAttachment::rtti))
 		{
@@ -128,14 +147,18 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 				m_clipper.clipEnd(slot);
 				continue;
 			}
-			pSfmlTexture = (sf::Texture*)((spine::AtlasRegion*)pMeshAttachment->getRendererObject())->page->getRendererObject();
 
 			m_worldVertices.setSize(pMeshAttachment->getWorldVerticesLength(), 0);
 			pMeshAttachment->computeWorldVertices(slot, 0, pMeshAttachment->getWorldVerticesLength(), m_worldVertices, 0, 2);
-			verticesCount = static_cast<int>(pMeshAttachment->getWorldVerticesLength() / 2);
 			pAttachmentUvs = &pMeshAttachment->getUVs();
 			pIndices = &pMeshAttachment->getTriangles();
-			indicesCount = static_cast<int>(pIndices->size());
+
+			/*Fetch texture handle stored in AltasPage*/
+#ifdef SPINE_4_1_OR_LATER
+			pSfmlTexture = (sf::Texture*)((spine::AtlasRegion*)pMeshAttachment->getRegion())->rendererObject;
+#else
+			pSfmlTexture = (sf::Texture*)((spine::AtlasRegion*)pMeshAttachment->getRendererObject())->page->getRendererObject();
+#endif
 		}
 		else if (pAttachment->getRTTI().isExactly(spine::ClippingAttachment::rtti))
 		{
@@ -149,10 +172,8 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 		{
 			m_clipper.clipTriangles(m_worldVertices, *pIndices, *pAttachmentUvs, 2);
 			pVertices = &m_clipper.getClippedVertices();
-			verticesCount = static_cast<int>(m_clipper.getClippedVertices().size() / 2);
 			pAttachmentUvs = &m_clipper.getClippedUVs();
 			pIndices = &m_clipper.getClippedTriangles();
-			indicesCount = static_cast<int>(m_clipper.getClippedTriangles().size());
 		}
 
 		const spine::Color& skeletonColor = skeleton->getColor();
@@ -172,7 +193,7 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 		* 1. Map index to vertex when adding.
 		* 2. Multiply alpha to colours if necessary. 
 		*/
-		for (int ii = 0; ii < indicesCount; ++ii)
+		for (int ii = 0; ii < pIndices->size(); ++ii)
 		{
 			sf::Vertex sfmlVertex;
 			sfmlVertex.position.x = (*pVertices)[(*pIndices)[ii] * 2LL];
@@ -196,36 +217,16 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 		switch (spineBlnedMode)
 		{
 		case spine::BlendMode_Additive:
-			sfmlBlendMode.colorSrcFactor = m_bAlphaPremultiplied ? sf::BlendMode::Factor::One : sf::BlendMode::Factor::SrcAlpha;
-			sfmlBlendMode.colorDstFactor = sf::BlendMode::Factor::One;
-			sfmlBlendMode.colorEquation = sf::BlendMode::Equation::Add;
-			sfmlBlendMode.alphaSrcFactor = sf::BlendMode::Factor::One;
-			sfmlBlendMode.alphaDstFactor = sf::BlendMode::Factor::One;
-			sfmlBlendMode.alphaEquation = sf::BlendMode::Equation::Add;
+			sfmlBlendMode = m_bAlphaPremultiplied ? m_sfmlBlendModeAddPma : sf::BlendAdd;
 			break;
 		case spine::BlendMode_Multiply:
-			sfmlBlendMode.colorSrcFactor = sf::BlendMode::Factor::DstColor;
-			sfmlBlendMode.colorDstFactor = sf::BlendMode::Factor::OneMinusSrcAlpha;
-			sfmlBlendMode.colorEquation = sf::BlendMode::Equation::Add;
-			sfmlBlendMode.alphaSrcFactor = sf::BlendMode::Factor::OneMinusSrcAlpha;
-			sfmlBlendMode.alphaDstFactor = sf::BlendMode::Factor::OneMinusSrcAlpha;
-			sfmlBlendMode.alphaEquation = sf::BlendMode::Equation::Add;
+			sfmlBlendMode = m_sfmlBlendModeMultiply;
 			break;
 		case spine::BlendMode_Screen:
-			sfmlBlendMode.colorSrcFactor = sf::BlendMode::Factor::One;
-			sfmlBlendMode.colorDstFactor = sf::BlendMode::Factor::OneMinusSrcColor;
-			sfmlBlendMode.colorEquation = sf::BlendMode::Equation::Add;
-			sfmlBlendMode.alphaSrcFactor = sf::BlendMode::Factor::OneMinusSrcColor;
-			sfmlBlendMode.alphaDstFactor = sf::BlendMode::Factor::OneMinusSrcColor;
-			sfmlBlendMode.alphaEquation = sf::BlendMode::Equation::Add;
+			sfmlBlendMode = m_sfmlBlendModeScreen;
 			break;
 		default:
-			sfmlBlendMode.colorSrcFactor = m_bAlphaPremultiplied ? sf::BlendMode::Factor::One : sf::BlendMode::SrcAlpha;
-			sfmlBlendMode.colorDstFactor = sf::BlendMode::Factor::OneMinusSrcAlpha;
-			sfmlBlendMode.colorEquation = sf::BlendMode::Equation::Add;
-			sfmlBlendMode.alphaSrcFactor = sf::BlendMode::Factor::One;
-			sfmlBlendMode.alphaDstFactor = sf::BlendMode::Factor::OneMinusSrcAlpha;
-			sfmlBlendMode.alphaEquation = sf::BlendMode::Equation::Add;
+			sfmlBlendMode = m_bAlphaPremultiplied ? m_sfmlBlendModeNormalPma : sf::BlendAlpha;
 			break;
 		}
 
@@ -237,23 +238,31 @@ void CSfmlSpineDrawable::draw(sf::RenderTarget& renderTarget, sf::RenderStates r
 	m_clipper.clipEnd();
 }
 
-void CSfmlSpineDrawable::SetLeaveOutList(const std::vector<std::string>& list)
+void CSfmlSpineDrawer::SetLeaveOutList(spine::Vector<spine::String>& list)
 {
 	/*There are some slots having mask or nuisance effect; exclude them from rendering.*/
 	m_leaveOutList.clear();
-	for (const auto& name : list)
+	for (size_t i = 0; i < list.size(); ++i)
 	{
-		m_leaveOutList.add(name.c_str());
+		m_leaveOutList.add(list[i].buffer());
 	}
 }
 
-bool CSfmlSpineDrawable::IsToBeLeftOut(const spine::String &slotName) const
+bool CSfmlSpineDrawer::IsToBeLeftOut(const spine::String &slotName) const
 {
 	/*The comparison method depends on what should be excluded; the precise matching or just containing.*/
-	for (size_t i = 0; i < m_leaveOutList.size(); ++i)
+	if (pLeaveOutCallback != nullptr)
 	{
-		if (strstr(slotName.buffer(), m_leaveOutList[i].buffer()) != nullptr)return true;
+		return pLeaveOutCallback(slotName.buffer(), slotName.length());
 	}
+	else
+	{
+		for (size_t i = 0; i < m_leaveOutList.size(); ++i)
+		{
+			if (strcmp(slotName.buffer(), m_leaveOutList[i].buffer()) == 0)return true;
+		}
+	}
+
 	return false;
 }
 
@@ -269,7 +278,6 @@ void CSfmlTextureLoader::load(spine::AtlasPage& page, const spine::String& path)
 	if (page.magFilter == spine::TextureFilter_Linear) texture->setSmooth(true);
 	if (page.uWrap == spine::TextureWrap_Repeat && page.vWrap == spine::TextureWrap_Repeat) texture->setRepeated(true);
 
-	page.setRendererObject(texture);
 	/*In case atlas size does not coincide with that of png, overwriting will collapse the layout.*/
 	if (page.width == 0 || page.height == 0)
 	{
@@ -277,6 +285,12 @@ void CSfmlTextureLoader::load(spine::AtlasPage& page, const spine::String& path)
 		page.width = size.x;
 		page.height = size.y;
 	}
+
+#ifdef SPINE_4_1_OR_LATER
+	page.texture = texture;
+#else
+	page.setRendererObject(texture);
+#endif
 }
 
 void CSfmlTextureLoader::unload(void* texture)
