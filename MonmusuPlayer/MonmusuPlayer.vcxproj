@@ -44,12 +44,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)deps\SFML-2.6.1\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)deps\SFML-2.6.2\include;$(ProjectDir)deps\spine-cpp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)deps\SFML-2.6.2\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)deps\SFML-2.6.1\include;$(ProjectDir)deps\spine-cpp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)deps\SFML-2.6.1\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)deps\SFML-2.6.2\include;$(ProjectDir)deps\spine-cpp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)deps\SFML-2.6.2\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

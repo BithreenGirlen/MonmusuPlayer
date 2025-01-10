@@ -361,6 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/MonmusuPlayer/deps/SFML-2.6.1
+
+/MonmusuPlayer/deps/SFML-2.6.2
 /MonmusuPlayer/deps/spine-cpp
 /MonmusuPlayer/deps/nlohmann
