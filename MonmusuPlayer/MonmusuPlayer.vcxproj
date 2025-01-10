@@ -81,7 +81,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="adv.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="mf_media_player.h" />
     <ClInclude Include="mnms.h" />
     <ClInclude Include="sfml_spine_player.h" />

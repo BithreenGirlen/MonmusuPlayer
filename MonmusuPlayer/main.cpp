@@ -1,6 +1,24 @@
 ﻿
 
-#include "framework.h"
+#include <SDKDDKVer.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+/*SFML*/
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "winmm.lib")
+
+#ifdef  _DEBUG
+#pragma comment(lib, "sfml-system-d.lib")
+#pragma comment(lib, "sfml-graphics-d.lib")
+#pragma comment(lib, "sfml-window-d.lib")
+#else
+#pragma comment(lib, "sfml-system.lib")
+#pragma comment(lib, "sfml-graphics.lib")
+#pragma comment(lib, "sfml-window.lib")
+#endif // _DEBUG
+
 #include "win_dialogue.h"
 #include "win_filesystem.h"
 #include "mnms.h"
@@ -20,7 +38,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         std::vector<std::wstring> folders;
         size_t nFolderIndex = 0;
-        win_filesystem::GetFolderListAndIndex(wstrPickedFolder, folders, &nFolderIndex);
+        win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, nullptr, folders, &nFolderIndex);
         for (;;)
         {
             std::wstring wstrFolderPath = folders.at(nFolderIndex);

@@ -1,4 +1,5 @@
 
+#include <Windows.h>
 
 #include "mnms.h"
 
@@ -255,7 +256,7 @@ bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::T
 
         if (!strError.empty())
         {
-            win_dialogue::ShowMessageBox("Parse error", strError.c_str());
+            ::MessageBoxA(nullptr, strError.c_str(), "Parse error", MB_ICONERROR);
             return false;
         }
     }

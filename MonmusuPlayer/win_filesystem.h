@@ -6,9 +6,12 @@
 
 namespace win_filesystem
 {
-	bool CreateFilePathList(const wchar_t* pwzFolderPath, const wchar_t* pwzFileExtension, std::vector<std::wstring>& paths);
-	void GetFolderListAndIndex(const std::wstring& wstrFolderPath, std::vector<std::wstring>& folders, size_t* nIndex);
+	bool CreateFilePathList(const wchar_t* pwzFolderPath, const wchar_t* pwzFileSpec, std::vector<std::wstring>& paths);
+	bool GetFilePathListAndIndex(const std::wstring& wstrPath, const wchar_t* pwzFileSpec, std::vector<std::wstring>& paths, size_t* nIndex);
 	std::string LoadFileAsString(const wchar_t* pwzFilePath);
 	std::wstring GetCurrentProcessPath();
+	std::wstring CreateWorkFolder(const std::wstring &wstrRelativePath);
+
+	bool SaveStringToFile(const wchar_t* pwzFilePath, const char* szData, unsigned long ulDataLength, bool bOverWrite = true);
 }
 #endif // WIN_FILESYSTEM_H_

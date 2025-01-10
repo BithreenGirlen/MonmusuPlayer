@@ -96,7 +96,7 @@ void CSfmlSpinePlayer::SetTexts(const std::vector<adv::TextDatum>& textData)
 	const auto iter = std::find_if(m_textData.begin(), m_textData.end(), HasAudio);
 	if (iter != m_textData.cend())
 	{
-		m_pAudioPlayer = std::make_unique<CMfMediaPlayer>(nullptr, 0);
+		m_pAudioPlayer = std::make_unique<CMfMediaPlayer>();
 	}
 }
 /*ウィンドウ表示*/

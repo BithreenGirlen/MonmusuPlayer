@@ -5,6 +5,8 @@
 
 #include "mf_media_player.h"
 
+#pragma comment (lib,"Mfplat.lib")
+
 CMfMediaPlayerNotify::CMfMediaPlayerNotify(void* pMediaPlayer)
 	:m_pPlayer(pMediaPlayer)
 {
@@ -30,9 +32,7 @@ void CMfMediaPlayerNotify::OnMediaEngineEvent(DWORD Event, DWORD_PTR param1, DWO
 	}
 }
 
-
-CMfMediaPlayer::CMfMediaPlayer(HWND hWnd, UINT uMsg)
-	:m_hRetWnd(hWnd), m_uRetMsg(uMsg)
+CMfMediaPlayer::CMfMediaPlayer()
 {
 	m_hrComInit = ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	if (FAILED(m_hrComInit))return;
@@ -41,50 +41,48 @@ CMfMediaPlayer::CMfMediaPlayer(HWND hWnd, UINT uMsg)
 	if (FAILED(m_hrMfStart))return;
 
 	CComPtr<IMFMediaEngineClassFactory> pMfFactory;
+	CComPtr<IMFMediaEngine> pMfMediaEngine;
 
 	HRESULT hr = ::CoCreateInstance(CLSID_MFMediaEngineClassFactory, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pMfFactory));
 	if (FAILED(hr))return;
 
-	CComPtr<IMFAttributes> pMfAttributes;
-
-	hr = ::MFCreateAttributes(&pMfAttributes, 1);
-	if (FAILED(hr))return;
-
-	hr = pMfAttributes->SetUINT64(MF_MEDIA_ENGINE_PLAYBACK_HWND, reinterpret_cast<UINT64>(m_hRetWnd));
+	hr = ::MFCreateAttributes(&m_pMfAttributes, 1);
 	if (FAILED(hr))return;
 
 	m_pmfNotify = new CMfMediaPlayerNotify(this);
-	hr = pMfAttributes->SetUnknown(MF_MEDIA_ENGINE_CALLBACK, reinterpret_cast<IUnknown*>(m_pmfNotify));
-	if (FAILED(hr))
-	{
-		m_pmfNotify->Release();
-		m_pmfNotify = nullptr;
-		return;
-	}
+	hr = m_pMfAttributes->SetUnknown(MF_MEDIA_ENGINE_CALLBACK, reinterpret_cast<IUnknown*>(m_pmfNotify));
+	if (FAILED(hr))goto failed;
 
-	CComPtr<IMFMediaEngine> pMfMediaEngine;
-	hr = pMfFactory->CreateInstance(MF_MEDIA_ENGINE_REAL_TIME_MODE, pMfAttributes, &pMfMediaEngine);
-	if (FAILED(hr))
-	{
-		m_pmfNotify->Release();
-		m_pmfNotify = nullptr;
-		return;
-	}
+	hr = pMfFactory->CreateInstance(MF_MEDIA_ENGINE_REAL_TIME_MODE, m_pMfAttributes, &pMfMediaEngine);
+	if (FAILED(hr))goto failed;
 
 	hr = pMfMediaEngine->QueryInterface(__uuidof(IMFMediaEngineEx), (void**)&m_pmfEngineEx);
-	if (FAILED(hr))
-	{
-		m_pmfNotify->Release();
-		m_pmfNotify = nullptr;
-		return;
-	}
+	if (FAILED(hr))goto failed;
 
 	m_pmfEngineEx->SetVolume(0.5);
 	m_pmfEngineEx->SetPreload(MF_MEDIA_ENGINE_PRELOAD_METADATA);
+
+	return;
+failed:
+	if (m_pmfNotify != nullptr)
+	{
+		m_pmfNotify->Release();
+		m_pmfNotify = nullptr;
+	}
+	if (m_pMfAttributes != nullptr)
+	{
+		m_pMfAttributes->Release();
+		m_pMfAttributes = nullptr;
+	}
 }
 
 CMfMediaPlayer::~CMfMediaPlayer()
 {
+	if (m_pMfAttributes != nullptr)
+	{
+		m_pMfAttributes->Release();
+		m_pMfAttributes = nullptr;
+	}
 	if (m_pmfEngineEx != nullptr)
 	{
 		m_pmfEngineEx->Shutdown();
@@ -103,7 +101,7 @@ CMfMediaPlayer::~CMfMediaPlayer()
 		m_hrComInit = E_FAIL;
 	}
 }
-
+/*再生*/
 bool CMfMediaPlayer::Play(const wchar_t* pwzFilePath)
 {
 	if (m_pmfEngineEx != nullptr)
@@ -142,6 +140,23 @@ BOOL CMfMediaPlayer::SwitchMute()
 	}
 	return m_iMute;
 }
+/*停止・再開*/
+BOOL CMfMediaPlayer::SwitchPause()
+{
+	if (m_pmfEngineEx != nullptr)
+	{
+		HRESULT hr = m_iPause ? m_pmfEngineEx->Play() : m_pmfEngineEx->Pause();
+		if (SUCCEEDED(hr))
+		{
+			m_iPause ^= TRUE;
+			if (m_iPause)
+			{
+				m_pmfEngineEx->FrameStep(TRUE);
+			}
+		}
+	}
+	return m_iPause;
+}
 /*音量取得*/
 double CMfMediaPlayer::GetCurrentVolume()
 {
@@ -159,6 +174,17 @@ double CMfMediaPlayer::GetCurrentRate()
 		return m_pmfEngineEx->GetPlaybackRate();
 	}
 	return 1.0;
+}
+/*再生位置取得*/
+long long CMfMediaPlayer::GetCurrentTimeInMilliSeconds()
+{
+	if (m_pmfEngineEx != nullptr)
+	{
+		double dbTime = m_pmfEngineEx->GetCurrentTime();
+		return static_cast<long long>(::round(dbTime * 1000));
+	}
+
+	return 0;
 }
 /*音量設定*/
 bool CMfMediaPlayer::SetCurrentVolume(double dbVolume)
@@ -201,6 +227,15 @@ bool CMfMediaPlayer::IsEnded()
 
 	return true;
 }
+/*発生事象通知先・描画先指定。*/
+bool CMfMediaPlayer::SetPlaybackWindow(HWND hWnd, UINT uMsg)
+{
+	m_hRetWnd = hWnd;
+	m_uRetMsg = uMsg;
+
+	HRESULT hr = m_pMfAttributes->SetUINT64(MF_MEDIA_ENGINE_PLAYBACK_HWND, reinterpret_cast<UINT64>(m_hRetWnd));
+	return SUCCEEDED(hr);
+}
 /*動画縦横幅取得*/
 bool CMfMediaPlayer::GetVideoSize(DWORD* dwWidth, DWORD* dwHeight)
 {
@@ -225,9 +260,9 @@ void CMfMediaPlayer::SetDisplayArea(const RECT absoluteRect)
 	WorkOutNormalisedRect(absoluteRect, &m_normalisedRect);
 }
 /*表示領域変更*/
-void CMfMediaPlayer::ResizeBuffer()
+bool CMfMediaPlayer::ResizeBuffer()
 {
-	if (m_pmfEngineEx != nullptr)
+	if (m_pmfEngineEx != nullptr && m_hRetWnd != nullptr)
 	{
 		BOOL iRet = m_pmfEngineEx->HasVideo();
 		if (iRet)
@@ -238,14 +273,17 @@ void CMfMediaPlayer::ResizeBuffer()
 			int iClientHeight = rc.bottom - rc.top;
 
 			MFARGB bg{ 0, 0, 0, 0 };
-			m_pmfEngineEx->UpdateVideoStream(&m_normalisedRect, &rc, &bg);
+			HRESULT hr = m_pmfEngineEx->UpdateVideoStream(&m_normalisedRect, &rc, &bg);
+			return SUCCEEDED(hr);
 		}
 	}
+
+	return false;
 }
 /*正規化矩形計算*/
 void CMfMediaPlayer::WorkOutNormalisedRect(const RECT absoluteRect, MFVideoNormalizedRect* normaisedRect)
 {
-	if (m_pmfEngineEx != nullptr && normaisedRect != nullptr)
+	if (m_pmfEngineEx != nullptr && normaisedRect != nullptr && m_hRetWnd != nullptr)
 	{
 		BOOL iRet = m_pmfEngineEx->HasVideo();
 		if (iRet)

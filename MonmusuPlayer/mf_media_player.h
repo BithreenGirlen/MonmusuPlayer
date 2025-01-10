@@ -53,25 +53,28 @@ private:
 class CMfMediaPlayer
 {
 public:
-	CMfMediaPlayer(HWND hWnd, UINT uMsg);
+	CMfMediaPlayer();
 	~CMfMediaPlayer();
 
 	bool Play(const wchar_t* pwzFilePath);
 	BOOL SwitchLoop();
 	BOOL SwitchMute();
+	BOOL SwitchPause();
 	double GetCurrentVolume();
 	double GetCurrentRate();
+	long long GetCurrentTimeInMilliSeconds();
 	bool SetCurrentVolume(double dbVolume);
 	bool SetCurrentRate(double dbRate);
 	bool IsEnded();
 
+	virtual bool SetPlaybackWindow(HWND hWnd, UINT uMsg = 0);
 	bool GetVideoSize(DWORD* dwWidth, DWORD* dwHeight);
 	void SetDisplayArea(const RECT absoluteRect);
-	void ResizeBuffer();
+	virtual bool ResizeBuffer();
 
 	HWND GetRetHwnd()const { return m_hRetWnd; }
 	UINT GetRetMsg() const { return m_uRetMsg; };
-private:
+protected:
 	HWND m_hRetWnd = nullptr;
 	UINT m_uRetMsg = 0;
 
@@ -79,9 +82,11 @@ private:
 	HRESULT m_hrMfStart = E_FAIL;
 	CMfMediaPlayerNotify* m_pmfNotify = nullptr;
 	IMFMediaEngineEx* m_pmfEngineEx = nullptr;
+	IMFAttributes* m_pMfAttributes = nullptr;
 
 	BOOL m_iLoop = FALSE;
 	BOOL m_iMute = FALSE;
+	BOOL m_iPause = FALSE;
 
 	MFVideoNormalizedRect m_normalisedRect{};
 
