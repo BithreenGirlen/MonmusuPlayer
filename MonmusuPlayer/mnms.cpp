@@ -424,3 +424,10 @@ bool mnms::IsSlotToBeLeftOut(const char* szSlotName, size_t nSlotNameLength)
     }
     return false;
 }
+
+unsigned int mnms::GetDisplayRefreshRate()
+{
+    DEVMODE sDevMode{};
+    ::EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &sDevMode);
+    return sDevMode.dmDisplayFrequency;
+}

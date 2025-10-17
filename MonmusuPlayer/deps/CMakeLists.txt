@@ -8,7 +8,7 @@ set(SPINE_RUNTIME_LANGUAGE "spine-cpp")
 set(NLOHMANN_JSON_VERSION "3.11.3")
 
 set(DIR_SFML ${CMAKE_CURRENT_LIST_DIR}/SFML-${SFML_VERSION})
-set(DIR_SPINE_CPP ${CMAKE_CURRENT_LIST_DIR}/spine-cpp)
+set(DIR_SPINE_CPP ${CMAKE_CURRENT_LIST_DIR}/spine-cpp-${SPINE_VERSION})
 set(DIR_NLOHMANN_JSON ${CMAKE_CURRENT_LIST_DIR}/nlohmann)
 
 set(DIR_TEMP ${CMAKE_CURRENT_BINARY_DIR}/temp)
@@ -66,3 +66,6 @@ if (NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../x64/Release/setting.txt")
 	file(COPY "${CMAKE_CURRENT_LIST_DIR}/setting.txt" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../../x64/Release")
 	file(COPY "${CMAKE_CURRENT_LIST_DIR}/setting.txt" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../../x64/Debug")
 endif()
+
+# Delete Spine runtimes for other languages because they are irrelevant for the project.
+file(REMOVE_RECURSE "${DIR_TEMP}")

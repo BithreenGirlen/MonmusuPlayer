@@ -19,6 +19,8 @@ namespace mnms
 	bool ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::TextDatum>& textData);
 
 	bool IsSlotToBeLeftOut(const char* szSlotName, size_t nSlotNameLength);
+
+	unsigned int GetDisplayRefreshRate();
 }
 
 #endif // !MNMS_H_

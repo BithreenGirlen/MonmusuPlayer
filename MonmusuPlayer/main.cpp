@@ -24,22 +24,22 @@
 #include "win_filesystem.h"
 #include "mnms.h"
 
-#include "sfml_spine_player.h"
+#include "sfml_main_window.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
-    setlocale(LC_ALL, ".utf8");
+    ::setlocale(LC_ALL, ".utf8");
 
     if (!mnms::InitialiseSetting())return 0;
 
     std::wstring wstrPickedFolder = win_dialogue::SelectWorkFolder(nullptr);
     if (!wstrPickedFolder.empty())
     {
-        CSfmlSpinePlayer SfmlPlayer;
-        SfmlPlayer.SetFont(mnms::GetFontFilePath(), true, true);
+        CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
+        sfmlMainWindow.SetFont(mnms::GetFontFilePath(), true, true);
 
         std::vector<std::wstring> folders;
         size_t nFolderIndex = 0;
@@ -56,18 +56,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             std::wstring wstrBookPath;
             mnms::DeriveEpisodeJsonPathFromSpineFolderPath(wstrFolderPath, wstrBookPath);
             std::vector<adv::TextDatum> textData;
+            std::vector<std::string> animationNames;
             if (!wstrBookPath.empty())
             {
                 mnms::ReadScenarioFile(wstrBookPath, textData);
             }
 
-            bool bRet = SfmlPlayer.SetSpineFromFile(atlasPaths, skelPaths, mnms::IsSkelBinary());
+            bool bRet = sfmlMainWindow.SetSpineFromFile(atlasPaths, skelPaths, mnms::IsSkelBinary());
             if (!bRet)break;
 
-            SfmlPlayer.SetTexts(textData);
-            SfmlPlayer.SetSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
+            sfmlMainWindow.SetScenarioData(textData, animationNames);
+            sfmlMainWindow.SetSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
 
-            int iRet = SfmlPlayer.Display(L"Monmusu Player");
+            int iRet = sfmlMainWindow.Display();
             if (iRet == 1)
             {
                 ++nFolderIndex;
