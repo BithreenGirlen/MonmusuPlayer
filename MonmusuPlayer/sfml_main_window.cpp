@@ -4,7 +4,7 @@
 
 CSfmlMainWindow::CSfmlMainWindow(const wchar_t* swzWindowName)
 {
-	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(200, 200), swzWindowName, sf::Style::None);
+	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ 200, 200 }), swzWindowName, sf::Style::None);
 
 	m_window->setPosition(sf::Vector2i(0, 0));
 
@@ -46,44 +46,45 @@ int CSfmlMainWindow::Display()
 	bool bLeftDowned = false;
 	bool bLeftCombinated = false;
 
+	int iRet = 0;
+
 	m_spineClock.restart();
 	while (m_window->isOpen())
 	{
-		sf::Event event;
-		while (m_window->pollEvent(event))
-		{
-			switch (event.type)
+		m_window->handleEvents
+		(
+			[&](const sf::Event::Closed&)
 			{
-			case sf::Event::Closed:
 				m_window->close();
-				break;
-			case sf::Event::MouseButtonPressed:
-				if (event.mouseButton.button == sf::Mouse::Left)
+			},
+			[&](const sf::Event::MouseButtonPressed& event)
+			{
+				if (event.button == sf::Mouse::Button::Left)
 				{
-					iMouseStartPos.x = event.mouseButton.x;
-					iMouseStartPos.y = event.mouseButton.y;
+					iMouseStartPos = event.position;
 
 					bLeftDowned = true;
 				}
-				break;
-			case sf::Event::MouseButtonReleased:
-				if (event.mouseButton.button == sf::Mouse::Left)
+			},
+			[&](const sf::Event::MouseButtonReleased& event)
+			{
+				if (event.button == sf::Mouse::Button::Left)
 				{
 					if (bLeftCombinated)
 					{
 						bLeftCombinated = false;
 						bLeftDowned = false;
-						break;
+						return;
 					}
 
-					if (bOnWindowMove || sf::Mouse::isButtonPressed(sf::Mouse::Right))
+					if (bOnWindowMove || sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 					{
 						bOnWindowMove ^= true;
-						break;
+						return;
 					}
 
-					int iX = iMouseStartPos.x - event.mouseButton.x;
-					int iY = iMouseStartPos.y - event.mouseButton.y;
+					int iX = iMouseStartPos.x - event.position.x;
+					int iY = iMouseStartPos.y - event.position.y;
 
 					if (iX == 0 && iY == 0 && m_animationNames.empty())
 					{
@@ -92,93 +93,101 @@ int CSfmlMainWindow::Display()
 
 					bLeftDowned = false;
 				}
-				if (event.mouseButton.button == sf::Mouse::Middle)
+				else if (event.button == sf::Mouse::Button::Middle)
 				{
 					m_sfmlSpinePlayer->ResetScale();
 					ResizeWindow();
 				}
-				break;
-			case sf::Event::MouseMoved:
-				if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			},
+			[&](const sf::Event::MouseMoved& event)
+			{
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 				{
 					if (bLeftDowned)
 					{
-						int iX = iMouseStartPos.x - event.mouseMove.x;
-						int iY = iMouseStartPos.y - event.mouseMove.y;
+						int iX = iMouseStartPos.x - event.position.x;
+						int iY = iMouseStartPos.y - event.position.y;
 						m_sfmlSpinePlayer->MoveViewPoint(iX, iY);
 
-						iMouseStartPos.x = event.mouseMove.x;
-						iMouseStartPos.y = event.mouseMove.y;
+						iMouseStartPos = event.position;
 
 						bLeftCombinated = true;
 					}
 				}
-				break;
-			case sf::Event::MouseWheelScrolled:
-				if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			},
+			[&](const sf::Event::MouseWheelScrolled& event)
+			{
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 				{
-					m_sfmlSpinePlayer->RescaleTime(event.mouseWheelScroll.delta < 0);
+					m_sfmlSpinePlayer->RescaleTime(event.delta < 0);
 					bLeftCombinated = true;
 				}
-				else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+				else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 				{
-					ShiftMessageText(event.mouseWheelScroll.delta < 0);
+					ShiftMessageText(event.delta < 0);
 				}
 				else
 				{
-					m_sfmlSpinePlayer->RescaleSkeleton(event.mouseWheelScroll.delta < 0);
-					if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+					m_sfmlSpinePlayer->RescaleSkeleton(event.delta < 0);
+					if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl))
 					{
-						m_sfmlSpinePlayer->RescaleCanvas(event.mouseWheelScroll.delta < 0);
+						m_sfmlSpinePlayer->RescaleCanvas(event.delta < 0);
 						ResizeWindow();
 					}
 				}
-				break;
-			case sf::Event::KeyPressed:
-				switch (event.key.code)
+			},
+			[&](const sf::Event::KeyPressed& event)
+			{
+				switch (event.scancode)
 				{
-				case sf::Keyboard::Key::Left:
+				case sf::Keyboard::Scancode::Left:
 					ShiftMessageText(false);
 					break;
-				case sf::Keyboard::Key::Right:
+				case sf::Keyboard::Scancode::Right:
 					if (m_nTextIndex < m_textData.size() - 1)
 					{
 						ShiftMessageText(true);
 					}
 					break;
-				}
-				break;
-			case sf::Event::KeyReleased:
-				switch (event.key.code)
-				{
-				case sf::Keyboard::Key::B:
-					m_sfmlSpinePlayer->ToggleBlendModeAdoption();
-					break;
-				case sf::Keyboard::Key::C:
-					ToggleTextColor();
-					break;
-				case sf::Keyboard::Key::R:
-					m_sfmlSpinePlayer->ToggleDrawOrder();
-					break;
-				case sf::Keyboard::Key::S:
-					SaveCurrentFrameImage();
-					break;
-				case sf::Keyboard::Key::T:
-					ToggleTextVisibility();
-					break;
-				case sf::Keyboard::Key::Escape:
-					m_window->close();
-					break;
-				case sf::Keyboard::Key::Up:
-					return 2;
-				case sf::Keyboard::Key::Down:
-					return 1;
 				default:
 					break;
 				}
-				break;
+			},
+			[&](const sf::Event::KeyReleased& event)
+			{
+				switch (event.scancode)
+				{
+				case sf::Keyboard::Scancode::B:
+					m_sfmlSpinePlayer->ToggleBlendModeAdoption();
+					break;
+				case sf::Keyboard::Scancode::C:
+					ToggleTextColor();
+					break;
+				case sf::Keyboard::Scancode::R:
+					m_sfmlSpinePlayer->ToggleDrawOrder();
+					break;
+				case sf::Keyboard::Scancode::S:
+					SaveCurrentFrameImage();
+					break;
+				case sf::Keyboard::Scancode::T:
+					ToggleTextVisibility();
+					break;
+				case sf::Keyboard::Scancode::Escape:
+					m_window->close();
+					break;
+				case sf::Keyboard::Scancode::Up:
+					iRet = 2;
+					break;
+				case sf::Keyboard::Scancode::Down:
+					iRet = 1;
+					break;
+				default:
+					break;
+				}
 			}
-		}
+		);
+
+		if (iRet != 0)break;
 
 		float fDelta = m_spineClock.getElapsedTime().asSeconds();
 		m_sfmlSpinePlayer->Update(fDelta);
@@ -189,7 +198,7 @@ int CSfmlMainWindow::Display()
 		m_sfmlSpinePlayer->Redraw();
 		if (!m_bTextHidden)
 		{
-			m_window->draw(m_msgText);
+			m_window->draw(*m_msgText);
 		}
 
 		m_window->display();
@@ -204,7 +213,7 @@ int CSfmlMainWindow::Display()
 		}
 	}
 
-	return 0;
+	return iRet;
 }
 
 void CSfmlMainWindow::ResizeWindow()
@@ -234,7 +243,7 @@ bool CSfmlMainWindow::SaveCurrentFrameImage()
 	strStrFilePath += "_" + std::to_string(fTrackTime) + ".png";
 
 	sf::Texture texture;
-	bool bRet = texture.create(m_window->getSize().x, m_window->getSize().y);
+	bool bRet = texture.resize({ m_window->getSize().x, m_window->getSize().y });
 	if (!bRet)return false;
 
 	texture.update(*m_window);
@@ -262,16 +271,15 @@ void CSfmlMainWindow::ShiftAnimation()
 /*字体設定*/
 bool CSfmlMainWindow::SetFont(const std::string& strFilePath, bool bBold, bool bItalic)
 {
-	bool bRet = m_font.loadFromFile(strFilePath);
+	bool bRet = m_font.openFromFile(strFilePath);
 	if (!bRet)return false;
 
 	constexpr float fOutLineThickness = 2.4f;
-
-	m_msgText.setFont(m_font);
-	m_msgText.setFillColor(sf::Color::Black);
-	m_msgText.setStyle((bBold ? sf::Text::Style::Bold : 0) | (bItalic ? sf::Text::Style::Italic : 0));
-	m_msgText.setOutlineThickness(fOutLineThickness);
-	m_msgText.setOutlineColor(sf::Color::White);
+	m_msgText = std::make_unique<sf::Text>(m_font);
+	m_msgText->setFillColor(sf::Color::Black);
+	m_msgText->setStyle((bBold ? sf::Text::Style::Bold : 0) | (bItalic ? sf::Text::Style::Italic : 0));
+	m_msgText->setOutlineThickness(fOutLineThickness);
+	m_msgText->setOutlineColor(sf::Color::White);
 
 	return true;
 }
@@ -282,7 +290,7 @@ void CSfmlMainWindow::SetScenarioData(std::vector<adv::TextDatum>& textData, std
 	m_animationNames = std::move(animationNames);
 
 	m_nTextIndex = 0;
-	m_msgText.setString("");
+	m_msgText->setString("");
 	m_nLastAnimationIndex = 0;
 
 	const auto HasAudio = [](const adv::TextDatum& text)
@@ -299,8 +307,8 @@ void CSfmlMainWindow::SetScenarioData(std::vector<adv::TextDatum>& textData, std
 /*文字色切り替え*/
 void CSfmlMainWindow::ToggleTextColor()
 {
-	m_msgText.setFillColor(m_msgText.getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
-	m_msgText.setOutlineColor(m_msgText.getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
+	m_msgText->setFillColor(m_msgText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
+	m_msgText->setOutlineColor(m_msgText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
 }
 
 void CSfmlMainWindow::ToggleTextVisibility()
@@ -355,7 +363,7 @@ void CSfmlMainWindow::UpdateMessageText()
 	if (!wstr.empty() && wstr.back() != L'\n') wstr += L"\n ";
 
 	wstr += std::to_wstring(m_nTextIndex + 1) + L"/" + std::to_wstring(m_textData.size());
-	m_msgText.setString(wstr);
+	m_msgText->setString(wstr);
 
 	/* Checks if animation has to be switched or not. */
 	//if (m_nLastAnimationIndex != textDatum.nAnimationIndex)

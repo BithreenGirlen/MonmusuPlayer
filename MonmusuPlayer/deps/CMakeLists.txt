@@ -1,11 +1,14 @@
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.10)
+project(MonmusuPlayer-deps)
 
-set(SFML_VERSION "2.6.2")
+set(SFML_MAJOR_VERSION "3")
+set(SFML_MINOR_VERSION ".0.2")
+set(SFML_VERSION ${SFML_MAJOR_VERSION}${SFML_MINOR_VERSION})
 
 set(SPINE_VERSION "3.8")
 set(SPINE_RUNTIME_LANGUAGE "spine-cpp")
 
-set(NLOHMANN_JSON_VERSION "3.11.3")
+set(NLOHMANN_JSON_VERSION "3.12.0")
 
 set(DIR_SFML ${CMAKE_CURRENT_LIST_DIR}/SFML-${SFML_VERSION})
 set(DIR_SPINE_CPP ${CMAKE_CURRENT_LIST_DIR}/spine-cpp-${SPINE_VERSION})
@@ -31,8 +34,8 @@ if (NOT EXISTS "${DIR_SFML}")
 	file(COPY "${DIR_TEMP}/SFML-${SFML_VERSION}/include" DESTINATION "${DIR_SFML}")
 	file(COPY "${DIR_TEMP}/SFML-${SFML_VERSION}/lib" DESTINATION "${DIR_SFML}")
 
-	set(DEBUG_DLLS "sfml-graphics-d-2.dll" "sfml-system-d-2.dll" "sfml-window-d-2.dll")
-	set(RELEASE_DLLS "sfml-graphics-2.dll" "sfml-system-2.dll" "sfml-window-2.dll")
+	set(DEBUG_DLLS "sfml-graphics-d-${SFML_MAJOR_VERSION}.dll" "sfml-system-d-${SFML_MAJOR_VERSION}.dll" "sfml-window-d-${SFML_MAJOR_VERSION}.dll")
+	set(RELEASE_DLLS "sfml-graphics-${SFML_MAJOR_VERSION}.dll" "sfml-system-${SFML_MAJOR_VERSION}.dll" "sfml-window-${SFML_MAJOR_VERSION}.dll")
 	# Debug dll
 	foreach(FILENAME IN LISTS DEBUG_DLLS)
 		file(COPY "${DIR_TEMP}/SFML-${SFML_VERSION}/bin/${FILENAME}" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../../x64/Debug")

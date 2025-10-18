@@ -24,7 +24,7 @@ void CSfmlSpinePlayer::Redraw()
 
 		sf::RenderStates renderState;
 		renderState.blendMode = sf::BlendAlpha;
-		renderState.transform.translate(-fX, -fY).scale(m_fSkeletonScale, m_fSkeletonScale);
+		renderState.transform.translate({ -fX, -fY }).scale({ m_fSkeletonScale, m_fSkeletonScale });
 
 		if (!m_bDrawOrderReversed)
 		{
@@ -50,8 +50,8 @@ void CSfmlSpinePlayer::WorkOutDefaultScale()
 	unsigned int uiSkeletonWidth = static_cast<unsigned int>(m_fBaseSize.x);
 	unsigned int uiSkeletonHeight = static_cast<unsigned int>(m_fBaseSize.y);
 
-	unsigned int uiDesktopWidth = sf::VideoMode::getDesktopMode().width;
-	unsigned int uiDesktopHeight = sf::VideoMode::getDesktopMode().height;
+	unsigned int uiDesktopWidth = sf::VideoMode::getDesktopMode().size.x;
+	unsigned int uiDesktopHeight = sf::VideoMode::getDesktopMode().size.y;
 
 	if (uiSkeletonWidth > uiDesktopWidth || uiSkeletonHeight > uiDesktopHeight)
 	{
@@ -78,8 +78,8 @@ void CSfmlSpinePlayer::WorkOutDefaultOffset()
 	for (const auto& pDrawable : m_drawables)
 	{
 		const auto& rect = pDrawable->GetBoundingBox();
-		fMinX = (std::min)(fMinX, rect.left);
-		fMinY = (std::min)(fMinY, rect.top);
+		fMinX = (std::min)(fMinX, rect.position.x);
+		fMinY = (std::min)(fMinY, rect.position.y);
 	}
 
 	m_fDefaultOffset = { fMinX, fMinY };

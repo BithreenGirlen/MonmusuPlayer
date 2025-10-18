@@ -40,13 +40,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
         sfmlMainWindow.SetFont(mnms::GetFontFilePath(), true, true);
+        sfmlMainWindow.GetWindow()->setFramerateLimit(mnms::GetDisplayRefreshRate());
 
         std::vector<std::wstring> folders;
         size_t nFolderIndex = 0;
         win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, nullptr, folders, &nFolderIndex);
         for (;;)
         {
-            std::wstring wstrFolderPath = folders.at(nFolderIndex);
+            const std::wstring& wstrFolderPath = folders.at(nFolderIndex);
 
             std::vector<std::string> atlasPaths;
             std::vector<std::string> skelPaths;

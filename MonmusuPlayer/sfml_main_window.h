@@ -41,7 +41,7 @@ public:
 	void SetScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
 private:
 	sf::Font m_font;
-	sf::Text m_msgText;
+	std::unique_ptr<sf::Text> m_msgText;
 	sf::Clock m_textClock;
 
 	std::vector<adv::TextDatum> m_textData;

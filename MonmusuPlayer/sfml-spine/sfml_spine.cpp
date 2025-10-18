@@ -10,9 +10,9 @@ namespace spine
 	}
 }
 
-static sf::BlendMode g_sfmlBlendModeNormalPma = sf::BlendMode(sf::BlendMode::One, sf::BlendMode::OneMinusSrcAlpha);
-static sf::BlendMode g_sfmlBlendModeAddPma = sf::BlendMode(sf::BlendMode::One, sf::BlendMode::One);
-static sf::BlendMode g_sfmlBlendModeScreen = sf::BlendMode(sf::BlendMode::One, sf::BlendMode::OneMinusSrcColor);
+static sf::BlendMode g_sfmlBlendModeNormalPma = sf::BlendMode(sf::BlendMode::Factor::One, sf::BlendMode::Factor::OneMinusSrcAlpha);
+static sf::BlendMode g_sfmlBlendModeAddPma = sf::BlendMode(sf::BlendMode::Factor::One, sf::BlendMode::Factor::One);
+static sf::BlendMode g_sfmlBlendModeScreen = sf::BlendMode(sf::BlendMode::Factor::One, sf::BlendMode::Factor::OneMinusSrcColor);
 static sf::BlendMode g_sfmlBlendModeMultiply = sf::BlendMode
 (
 	sf::BlendMode::Factor::DstColor,
@@ -217,10 +217,10 @@ void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates ren
 			sfmlVertex.position.x = (*pVertices)[(*pIndices)[ii] * 2LL];
 			sfmlVertex.position.y = (*pVertices)[(*pIndices)[ii] * 2LL + 1];
 
-			sfmlVertex.color.r = (sf::Uint8)(tint.r * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
-			sfmlVertex.color.g = (sf::Uint8)(tint.g * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
-			sfmlVertex.color.b = (sf::Uint8)(tint.b * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
-			sfmlVertex.color.a = (sf::Uint8)(tint.a * 255.f);
+			sfmlVertex.color.r = (std::uint8_t)(tint.r * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
+			sfmlVertex.color.g = (std::uint8_t)(tint.g * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
+			sfmlVertex.color.b = (std::uint8_t)(tint.b * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
+			sfmlVertex.color.a = (std::uint8_t)(tint.a * 255.f);
 
 			sfmlVertex.texCoords.x = (*pAttachmentUvs)[(*pIndices)[ii] * 2LL] * textureSize.x;
 			sfmlVertex.texCoords.y = (*pAttachmentUvs)[(*pIndices)[ii] * 2LL + 1] * textureSize.y;
@@ -271,7 +271,7 @@ sf::FloatRect CSfmlSpineDrawer::GetBoundingBox() const
 	if (skeleton != nullptr)
 	{
 		spine::Vector<float> tempVertices;
-		skeleton->getBounds(boundingBox.left, boundingBox.top, boundingBox.width, boundingBox.height, tempVertices);
+		skeleton->getBounds(boundingBox.position.x, boundingBox.position.y, boundingBox.size.x, boundingBox.size.y, tempVertices);
 	}
 
 	return boundingBox;
