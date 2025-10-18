@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MonmusuPlayer", "MonmusuPlayer\MonmusuPlayer.vcxproj", "{ACB6E4FC-6146-4CCD-BDE6-2DFD4839C62B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MonmusuPlayer", "project\MonmusuPlayer.vcxproj", "{ACB6E4FC-6146-4CCD-BDE6-2DFD4839C62B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -47,7 +47,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, nullptr, folders, &nFolderIndex);
         for (;;)
         {
-            const std::wstring& wstrFolderPath = folders.at(nFolderIndex);
+            const std::wstring& wstrFolderPath = folders[nFolderIndex];
 
             std::vector<std::string> atlasPaths;
             std::vector<std::string> skelPaths;
