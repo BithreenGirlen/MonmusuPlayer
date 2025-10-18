@@ -6,15 +6,13 @@
 class CSfmlSpinePlayer : public CSpinePlayer
 {
 public:
-	CSfmlSpinePlayer(sf::RenderWindow* pSfmlWindow);
+	CSfmlSpinePlayer();
 	virtual ~CSfmlSpinePlayer();
 
-	virtual void Redraw();
+	void Draw(sf::RenderTarget* renderTarget);
 private:
 	virtual void WorkOutDefaultScale();
 	virtual void WorkOutDefaultOffset();
-
-	sf::RenderWindow *m_pSfmlWindow = nullptr;
 };
 
 #endif // !SFML_SPINE_PLAYER_H_

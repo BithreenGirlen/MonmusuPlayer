@@ -25,8 +25,7 @@ public:
 	size_t GetNumberOfSpines() const;
 	bool HasSpineBeenLoaded() const;
 
-	virtual void Update(float fDelta);
-	virtual void Redraw() = 0;
+	void Update(float fDelta);
 
 	void RescaleSkeleton(bool bUpscale);
 	void RescaleCanvas(bool bUpscale);

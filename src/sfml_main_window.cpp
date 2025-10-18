@@ -8,7 +8,7 @@ CSfmlMainWindow::CSfmlMainWindow(const wchar_t* swzWindowName)
 
 	m_window->setPosition(sf::Vector2i(0, 0));
 
-	m_sfmlSpinePlayer = std::make_unique<CSfmlSpinePlayer>(m_window.get());
+	m_sfmlSpinePlayer = std::make_unique<CSfmlSpinePlayer>();
 }
 
 CSfmlMainWindow::~CSfmlMainWindow()
@@ -164,7 +164,7 @@ int CSfmlMainWindow::Display()
 					m_sfmlSpinePlayer->ToggleDrawOrder();
 					break;
 				case sf::Keyboard::Scancode::S:
-					SaveCurrentFrameImage();
+					SaveCurrentFrameToFile();
 					break;
 				case sf::Keyboard::Scancode::T:
 					ToggleTextVisibility();
@@ -194,8 +194,15 @@ int CSfmlMainWindow::Display()
 		m_spineClock.restart();
 
 		m_window->clear(sf::Color(0, 0, 0, 0));
+		{
+			m_spineRenderTexture.clear();
+			m_sfmlSpinePlayer->Draw(&m_spineRenderTexture);
+			m_spineRenderTexture.display();
 
-		m_sfmlSpinePlayer->Redraw();
+			sf::Sprite spineSprite(m_spineRenderTexture.getTexture());
+			m_window->draw(spineSprite);
+		}
+
 		if (!m_bTextHidden)
 		{
 			m_window->draw(*m_msgText);
@@ -226,12 +233,16 @@ void CSfmlMainWindow::ResizeWindow()
 		unsigned int uiWindowWidthMax = static_cast<unsigned int>(fBaseSize.x * fScale);
 		unsigned int uiWindowHeightMax = static_cast<unsigned int>(fBaseSize.y * fScale);
 
-		m_window->setSize(sf::Vector2u(static_cast<unsigned int>(fBaseSize.x * fScale), static_cast<unsigned int>(fBaseSize.y * fScale)));
+		sf::Vector2u windowSize = sf::Vector2u(static_cast<unsigned int>(fBaseSize.x * fScale), static_cast<unsigned int>(fBaseSize.y * fScale));
+		m_window->setSize(windowSize);
 		m_window->setView(sf::View((fBaseSize * fScale) / 2.f, fBaseSize * fScale));
+
+		/* This is [[nodiscard]], but what to do should it fail? */
+		bool bRet = m_spineRenderTexture.resize(windowSize);
 	}
 }
 
-bool CSfmlMainWindow::SaveCurrentFrameImage()
+bool CSfmlMainWindow::SaveCurrentFrameToFile()
 {
 	/*SFML does not have API equivalent to SDL's SDL_GetBasePath().*/
 	float fTrackTime = 0.f;
@@ -239,19 +250,15 @@ bool CSfmlMainWindow::SaveCurrentFrameImage()
 	const char* pzAnimationName = m_sfmlSpinePlayer->GetCurrentAnimationName();
 	if (pzAnimationName == nullptr)return false;
 
-	std::string strStrFilePath = pzAnimationName;
-	strStrFilePath += "_" + std::to_string(fTrackTime) + ".png";
+	std::string strFilePath = pzAnimationName;
+	char sBuffer[16]{};
+	sprintf_s(sBuffer, "_%.3f.png", fTrackTime);
+	strFilePath += sBuffer;
 
-	sf::Texture texture;
-	bool bRet = texture.resize({ m_window->getSize().x, m_window->getSize().y });
-	if (!bRet)return false;
-
-	texture.update(*m_window);
+	sf::Texture texture = m_spineRenderTexture.getTexture();
 	sf::Image image = texture.copyToImage();
 
-	bRet = image.saveToFile(strStrFilePath);
-
-	return bRet;
+	return image.saveToFile(strFilePath);
 }
 /*字体設定*/
 bool CSfmlMainWindow::SetFont(const std::string& strFilePath, bool bBold, bool bItalic)

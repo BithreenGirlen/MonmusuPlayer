@@ -27,10 +27,11 @@ private:
 
 	std::unique_ptr<CSfmlSpinePlayer> m_sfmlSpinePlayer;
 	sf::Clock m_spineClock;
+	sf::RenderTexture m_spineRenderTexture;
 
 	void ResizeWindow();
 
-	bool SaveCurrentFrameImage();
+	bool SaveCurrentFrameToFile();
 	/*文章表示用*/
 public:
 	bool SetFont(const std::string& strFilePath, bool bBold, bool bItalic);

@@ -2,8 +2,7 @@
 
 #include "sfml_spine_player.h"
 
-CSfmlSpinePlayer::CSfmlSpinePlayer(sf::RenderWindow* pSfmlWindow)
-	:m_pSfmlWindow(pSfmlWindow)
+CSfmlSpinePlayer::CSfmlSpinePlayer()
 {
 
 }
@@ -13,14 +12,13 @@ CSfmlSpinePlayer::~CSfmlSpinePlayer()
 
 }
 
-
-void CSfmlSpinePlayer::Redraw()
+void CSfmlSpinePlayer::Draw(sf::RenderTarget* renderTarget)
 {
-	if (m_pSfmlWindow != nullptr)
+	if (renderTarget != nullptr)
 	{
-		const auto& windowSize = m_pSfmlWindow->getSize();
-		float fX = (m_fBaseSize.x * m_fSkeletonScale - windowSize.x) / 2;
-		float fY = (m_fBaseSize.y * m_fSkeletonScale - windowSize.y) / 2;
+		const auto& targetSize = renderTarget->getSize();
+		float fX = (m_fBaseSize.x * m_fSkeletonScale - targetSize.x) / 2;
+		float fY = (m_fBaseSize.y * m_fSkeletonScale - targetSize.y) / 2;
 
 		sf::RenderStates renderState;
 		renderState.blendMode = sf::BlendAlpha;
@@ -30,17 +28,18 @@ void CSfmlSpinePlayer::Redraw()
 		{
 			for (size_t i = 0; i < m_drawables.size(); ++i)
 			{
-				m_pSfmlWindow->draw(*m_drawables[i], renderState);
+				renderTarget->draw(*m_drawables[i], renderState);
 			}
 		}
 		else
 		{
-			for(long long i = m_drawables.size() - 1;i >= 0;--i)
+			for (long long i = m_drawables.size() - 1; i >= 0; --i)
 			{
-				m_pSfmlWindow->draw(*m_drawables[i], renderState);
+				renderTarget->draw(*m_drawables[i], renderState);
 			}
 		}
 	}
+
 }
 /*標準尺度算出*/
 void CSfmlSpinePlayer::WorkOutDefaultScale()
