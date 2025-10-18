@@ -1,14 +1,16 @@
 # MonmusuPlayer
+
 某TDのアレのシーン再生用。
 
 ## 動作要件
+
 - Windows 10 以降のWindows OS
 - MSVC 2015-2022 (x64)
 
 ## 再生方法
 
-階層構造を保持するよう注意しつつ、以下のようなファイル群をご用意下さい。  
-フォルダ選択ダイアログから`advscene/resources/advscene/texture/character/r18_XXXXX_X`フォルダを選択すると再生を開始します。
+以下のような階層構造から成るファイル群をご用意した上で、  
+フォルダ選択ダイアログから`advscene/resources/advscene/texture/character/r18_scenes/r18_XXXXX_X`フォルダを選択すると再生を開始します。
 <pre>
 advscene
 ├ resources
@@ -57,30 +59,31 @@ advscene
   └ ...
 </pre>
 
-  ## マウス操作
+  ## マウス機能
 | 入力  | 機能  |
 | --- | --- |
-| マウスホイール | 拡大・縮小。 |
-| 左ボタン + マウスホイール | 動作加速・減速 |
-| 左ボタンクリック | 動作移行。 |
-| 左ボタンドラッグ | 視点移動。 |
-| 中ボタン | 尺度・速度・視点初期化。 |
-| 右ボタン + マウスホイール | 文章送り・戻し。 |
-| 右ボタン + 左ボタンクリック | 窓移動。 |
+| ホイール回転 | 窓の拡大・縮小。`Ctrl`を押しながらで寄り・引き。 |
+| 左押し + ホイール回転 | 動作加速・減速。 |
+| 左クリック | 動作移行。同期を切った場合のみ有効。 |
+| 左ドラッグ | 視点移動。 |
+| 中クリック | 尺度・速度・視点初期化。 |
+| 右押し + ホイール回転 | 文章送り・戻し。 |
+| 右押し + 左クリック | 窓移動開始。左クリックで終了。 |
 
-## キー操作
+## キーボード機能
 | 入力  | 機能  |
 | --- | --- |
-| Esc | 再生終了。 |
-| A   |乗算済みアルファ有効/無効切り替え。 |
-| B   | スロット指定混成法尊重/無視切り替え。 |
-| C   | 文字色黒・白切り替え。 |
-| T   | 文章表示・非表示切り替え。 |
-| Up | 前のフォルダに移動。 |
-| Down | 次のフォルダに移動。 |
-| PageUp | 音声加速。 |
-| PageDown | 音声減速。 |
-| Home | 音声等倍速。 |  
+| <kbd>Esc</kbd> | 再生終了。 |
+| <kbd>A</kbd> | 乗算済みアルファ有効/無効切り替え。 |
+| <kbd>B</kbd> | スロット指定混成法尊重/無視切り替え。 |
+| <kbd>C</kbd> | 文字色黒・白切り替え。 |
+| <kbd>S</kbd>   | 画像出力。 |
+| <kbd>T</kbd>   | 文章表示・非表示切り替え。 |
+| <kbd>Q</kbd>   | アニメーションと文章を同期 / 独立して制御。 |
+| <kbd>Up</kbd> | 前のフォルダに移動。 |
+| <kbd>Down</kbd> | 次のフォルダに移動。 |
+| <kbd>Right</kbd> | 文章送り。 |
+| <kbd>Left</kbd> | 文章戻し。 |
 
 ## 設定
 
@@ -89,32 +92,17 @@ advscene
 - 再生関連ファイル(Spine素材・音声・台本)の拡張子
 
 ## 外部ライブラリ
-- [JSON for Modern C++ v3.11.3](https://github.com/nlohmann/json/releases/tag/v3.11.3)
-- [SFML-2.6.2](https://www.sfml-dev.org/download/sfml/2.6.2/)
+
+- [JSON for Modern C++ v3.12.0](https://github.com/nlohmann/json/releases/tag/v3.12.0)
+- [SFML-3.0.2](https://www.sfml-dev.org/download/sfml/3.0.2/)
 - [spine-cpp-3.8](https://github.com/EsotericSoftware/spine-runtimes/tree/3.8)
 
 ## 構築方法
 
-1. `MonmusuPlayer/deps/CMakeLists.txt`を実行して外部ライブラリを取得。
-2. Visual Studioから`MonmusuPlayer.sln`を開く。
-3. メニュー欄`ビルド`から`ソリューションのビルド`を選択。
+Visual Studioが必要になります。
 
-`MonmusuPlayer/deps`以下は次のような構成になります。
-<pre>
-deps
-├ nlohmann // JSON for Modern C++
-│  └ json.hpp
-├ SFML-2.6.2 // VC17向けSFML
-│  ├ include
-│  │  └ SFML
-│  │    └ ...
-│  └ lib
-│       └ ...
-└ spine-cpp // Spine 3.8向けのC++汎用ランタイム
-   ├ include
-   │  └ spine
-   │    └ ...
-   └ src
-    └ spine
-        └ ...
-</pre>
+1. `src/deps`階層をファイルエクスプローラーで開く。
+2. `階層表示欄にcmdと入力し、コマンドプロンプトを立ち上げる。
+3. `start devenv .`と入力し、Visual Studioを立ち上げる。
+4. CMake設定が完了するのを待つ。
+5. `MonmusuPlayer.sln`を開いてビルド。
