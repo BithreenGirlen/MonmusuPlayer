@@ -31,10 +31,6 @@ private:
 	void ResizeWindow();
 
 	bool SaveCurrentFrameImage();
-
-	size_t m_animationIndex = 0;
-	void ShiftAnimation();
-
 	/*文章表示用*/
 public:
 	bool SetFont(const std::string& strFilePath, bool bBold, bool bItalic);
@@ -47,16 +43,21 @@ private:
 	std::vector<adv::TextDatum> m_textData;
 	size_t m_nTextIndex = 0;
 	bool m_bTextHidden = false;
+	bool m_bImageSynced = true;
 
 	std::vector<std::string> m_animationNames;
 	size_t m_nLastAnimationIndex = 0;
 
 	void ToggleTextColor();
 	void ToggleTextVisibility();
+	void ToggleImageSync();
 
 	void CheckTimer();
 	void ShiftMessageText(bool bForward);
 	void UpdateMessageText();
+
+	void ShiftAnimation();
+	void CheckAnimationTrack();
 
 	std::unique_ptr<CMfMediaPlayer> m_pAudioPlayer;
 };

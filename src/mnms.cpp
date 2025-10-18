@@ -1,4 +1,4 @@
-
+Ôªø
 #include <Windows.h>
 
 #include "mnms.h"
@@ -11,172 +11,235 @@
 
 namespace mnms
 {
-    struct SPlayerSetting
-    {
-        std::wstring wstrAtlasExtension = L".atlas.txt";
-        std::wstring wstrSkelExtension = L".skel.txt";
-        std::wstring wstrVoiceExtension = L".m4a";;
-        std::wstring wstrSceneTextExtension = L".json";
-        std::string strFontFilePath = "C:\\Windows\\Fonts\\yumindb.ttf";
-    };
+	struct SPlayerSetting
+	{
+		std::wstring wstrAtlasExtension = L".atlas.txt";
+		std::wstring wstrSkelExtension = L".skel.txt";
+		std::wstring wstrVoiceExtension = L".m4a";;
+		std::wstring wstrSceneTextExtension = L".json";
+		std::string strFontFilePath = "C:\\Windows\\Fonts\\yumindb.ttf";
+	};
 
-    static SPlayerSetting g_playerSetting;
+	static SPlayerSetting g_playerSetting;
 
-    static bool ReadSettingFile(SPlayerSetting& playerSetting)
-    {
-        std::wstring wstrFilePath = win_filesystem::GetCurrentProcessPath() + L"\\setting.txt";
-        std::string strFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
-        if (strFile.empty())return false;
+	static bool ReadSettingFile(SPlayerSetting& playerSetting)
+	{
+		std::wstring wstrFilePath = win_filesystem::GetCurrentProcessPath() + L"\\setting.txt";
+		std::string strFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
+		if (strFile.empty())return false;
 
-        std::string strError;
+		std::string strError;
 
-        try
-        {
-            nlohmann::json nlJson = nlohmann::json::parse(strFile);
-            std::string str;
+		try
+		{
+			nlohmann::json nlJson = nlohmann::json::parse(strFile);
+			std::string str;
 
-            nlohmann::json& jExtension = nlJson.at("extensions");
+			const nlohmann::json& jExtension = nlJson.at("extensions");
 
-            str = std::string(jExtension.at("atlas"));
-            playerSetting.wstrAtlasExtension = win_text::WidenUtf8(str);
+			str = jExtension.at("atlas");
+			playerSetting.wstrAtlasExtension = win_text::WidenUtf8(str);
 
-            str = std::string(jExtension.at("skel"));
-            playerSetting.wstrSkelExtension = win_text::WidenUtf8(str);
+			str = jExtension.at("skel");
+			playerSetting.wstrSkelExtension = win_text::WidenUtf8(str);
 
-            str = std::string(jExtension.at("voice"));
-            playerSetting.wstrVoiceExtension = win_text::WidenUtf8(str);
+			str = jExtension.at("voice");
+			playerSetting.wstrVoiceExtension = win_text::WidenUtf8(str);
 
-            str = std::string(jExtension.at("sceneText"));
-            playerSetting.wstrSceneTextExtension = win_text::WidenUtf8(str);
+			str = jExtension.at("sceneText");
+			playerSetting.wstrSceneTextExtension = win_text::WidenUtf8(str);
 
-            playerSetting.strFontFilePath = nlJson.at("fontPath");
+			playerSetting.strFontFilePath = nlJson.at("fontPath");
 
-        }
-        catch (nlohmann::json::exception e)
-        {
-            strError = e.what();
-            ::MessageBoxA(nullptr, strError.c_str(), "Setting error", MB_ICONERROR);
-        }
+		}
+		catch (nlohmann::json::exception e)
+		{
+			strError = e.what();
+			::MessageBoxA(nullptr, strError.c_str(), "Setting error", MB_ICONERROR);
+		}
 
-        return strError.empty();
-    }
+		return strError.empty();
+	}
 
-    std::wstring g_wstrVoiceFolderPath;
+	struct CommandIndex abstract final
+	{
+		enum
+		{
+			Unspecified,
+			Command,
+			Arg1,
+			Arg2,
+			Arg3,
+			Arg4,
+			Arg5,
+			Arg6,
+			WaitType,
+			Text,
+			PageCtrl,
+			Voice,
+			WIndowType
+		};
+	};
 
-    bool SetVoiceFolderPath(const std::wstring& wstrScenarioFiLePath)
-    {
-        size_t nPos = wstrScenarioFiLePath.rfind(L"advscene\\");
-        if (nPos == std::wstring::npos)return false;
-        g_wstrVoiceFolderPath = wstrScenarioFiLePath.substr(0, nPos);
-        g_wstrVoiceFolderPath += L"advscene\\resources\\advscene\\sound\\voice\\";
-        return true;
-    }
+	std::wstring g_wstrVoiceFolderPath;
 
-    std::wstring VoiceRelativeUrlToFilePath(const std::wstring& wstrRelativePath)
-    {
-        if (g_wstrVoiceFolderPath.empty())return std::wstring();
+	static bool SetVoiceFolderPath(const std::wstring& wstrScenarioFiLePath)
+	{
+		size_t nPos = wstrScenarioFiLePath.rfind(L"advscene\\");
+		if (nPos == std::wstring::npos)return false;
+		g_wstrVoiceFolderPath = wstrScenarioFiLePath.substr(0, nPos);
+		g_wstrVoiceFolderPath += L"advscene\\resources\\advscene\\sound\\voice\\";
+		return true;
+	}
 
-        std::wstring wstr = wstrRelativePath;
-        for (;;)
-        {
-            size_t nPos = wstr.find(L'/');
-            if (nPos == std::wstring::npos)break;
-            wstr.replace(nPos, 1, L"\\");
-        }
+	static std::wstring VoiceRelativeUrlToFilePath(const std::wstring& wstrRelativePath)
+	{
+		if (g_wstrVoiceFolderPath.empty())return std::wstring();
 
-        return g_wstrVoiceFolderPath + wstr + g_playerSetting.wstrVoiceExtension;
-    }
+		std::wstring wstr = wstrRelativePath;
+		for (;;)
+		{
+			size_t nPos = wstr.find(L'/');
+			if (nPos == std::wstring::npos)break;
+			wstr.replace(nPos, 1, L"\\");
+		}
 
-    static void EliminateTag(std::wstring& wstr)
-    {
-        std::wstring wstrResult;
-        wstrResult.reserve(wstr.size());
-        int iCount = 0;
-        for (const auto& c : wstr)
-        {
-            if (c == L'<')
-            {
-                ++iCount;
-                continue;
-            }
-            else if (c == L'>')
-            {
-                --iCount;
-                continue;
-            }
+		return g_wstrVoiceFolderPath + wstr + g_playerSetting.wstrVoiceExtension;
+	}
 
-            if (iCount == 0)
-            {
-                wstrResult.push_back(c);
-            }
-        }
-        wstr = wstrResult;
-    }
+	/* ‰∫∫Áâ©IDÊäΩÂá∫ */
+	static std::wstring ExtractCharacterIdFromSpineFolderPath(const std::wstring& wstrSpineFolderPath)
+	{
+		size_t nPos = wstrSpineFolderPath.find_last_of(L"\\/");
+		if (nPos == std::wstring::npos)return {};
+
+		std::wstring wstrCurrent = wstrSpineFolderPath.substr(nPos + 1);
+		nPos = wstrCurrent.find(L"r18_");
+		if (nPos == std::wstring::npos)return {};
+		/* length of "r18_" */
+		size_t nPos2 = wstrCurrent.substr(nPos + 4).rfind(L"_");
+		if (nPos2 == std::wstring::npos)return {};
+
+		return wstrCurrent.substr(nPos + 4, nPos2);
+	}
+
+	/* IDÂØæÂøúÂÖàÊé¢Á¥¢ */
+	static std::wstring FindPathContainingId(const std::wstring& targetFolder, const std::wstring& wstrId, const wchar_t* pwzFileExtension)
+	{
+		std::vector<std::wstring> paths;
+		win_filesystem::CreateFilePathList(targetFolder.c_str(), pwzFileExtension, paths);
+		const auto IsContained = [&wstrId](const std::wstring& wstr)
+			-> bool
+			{
+				return wcsstr(wstr.c_str(), wstrId.c_str()) != nullptr;
+			};
+
+		const auto iter = std::find_if(paths.begin(), paths.end(), IsContained);
+		if (iter == paths.cend())return std::wstring();
+
+		size_t nIndex = std::distance(paths.begin(), iter);
+		return paths[nIndex];
+	}
+
+	static std::wstring ToBookId(const std::wstring& wstrCharacterId, const wchar_t sceneNumber)
+	{
+		if (!wstrCharacterId.empty() && wstrCharacterId[0] == L'3')
+		{
+			/*30005*/
+			wchar_t id[3] = L"c1";
+			id[0] += sceneNumber - '1';
+			return id;
+		}
+		else
+		{
+			return sceneNumber == L'1' ? L"a1" : L"b1";
+		}
+	}
+
+	static void EliminateTag(std::wstring& wstr)
+	{
+		std::wstring wstrResult;
+		wstrResult.reserve(wstr.size());
+		int iCount = 0;
+		for (const auto& c : wstr)
+		{
+			if (c == L'<')
+			{
+				++iCount;
+				continue;
+			}
+			else if (c == L'>')
+			{
+				--iCount;
+				continue;
+			}
+
+			if (iCount == 0)
+			{
+				wstrResult.push_back(c);
+			}
+		}
+		wstr = std::move(wstrResult);
+	}
 }
 
 bool mnms::InitialiseSetting()
 {
-    SPlayerSetting playerSetting;
-    bool bRet = ReadSettingFile(playerSetting);
-    if (bRet)
-    {
-        g_playerSetting = std::move(playerSetting);
-    }
+	SPlayerSetting playerSetting;
+	bool bRet = ReadSettingFile(playerSetting);
+	if (bRet)
+	{
+		g_playerSetting = std::move(playerSetting);
+	}
 
-    return g_playerSetting.wstrAtlasExtension != g_playerSetting.wstrSkelExtension;
+	return g_playerSetting.wstrAtlasExtension != g_playerSetting.wstrSkelExtension;
 }
 
 const std::string& mnms::GetFontFilePath()
 {
-    return g_playerSetting.strFontFilePath;
+	return g_playerSetting.strFontFilePath;
 }
 
 const bool mnms::IsSkelBinary()
 {
-    const wchar_t* wszBinaryCandidates[] =
-    {
-        L".skel", L".bin"
-    };
-    for (size_t i = 0; i < sizeof(wszBinaryCandidates) / sizeof(wszBinaryCandidates[0]); ++i)
-    {
-        if (g_playerSetting.wstrSkelExtension.find(wszBinaryCandidates[i]) != std::wstring::npos)
-        {
-            return true;
-        }
-    }
-    return false;
+	constexpr const wchar_t* const wszBinaryCandidates[] =
+	{
+		L".skel", L".bin"
+	};
+	for (const auto& wszBinaryCandidate : wszBinaryCandidates)
+	{
+		if (g_playerSetting.wstrSkelExtension.find(wszBinaryCandidate) != std::wstring::npos)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
-/*ï`âÊëfçﬁàÍóóéÊìæ*/
+/*ÊèèÁîªÁ¥†Êùê‰∏ÄË¶ßÂèñÂæó*/
 void mnms::GetSpineList(const std::wstring& wstrFolderPath, std::vector<std::string>& atlasPaths, std::vector<std::string>& skelPaths)
 {
-    bool bAtlasLonger = g_playerSetting.wstrAtlasExtension.size() > g_playerSetting.wstrSkelExtension.size();
+	bool bAtlasLonger = g_playerSetting.wstrAtlasExtension.size() > g_playerSetting.wstrSkelExtension.size();
 
-    std::wstring& wstrLongerExtesion = bAtlasLonger ? g_playerSetting.wstrAtlasExtension : g_playerSetting.wstrSkelExtension;
-    std::wstring& wstrShorterExtension = bAtlasLonger ? g_playerSetting.wstrSkelExtension : g_playerSetting.wstrAtlasExtension;
-    std::vector<std::string>& strLongerPaths = bAtlasLonger ? atlasPaths : skelPaths;
-    std::vector<std::string>& strShorterPaths = bAtlasLonger ? skelPaths : atlasPaths;
+	const std::wstring& wstrLongerExtesion = bAtlasLonger ? g_playerSetting.wstrAtlasExtension : g_playerSetting.wstrSkelExtension;
+	const std::wstring& wstrShorterExtension = bAtlasLonger ? g_playerSetting.wstrSkelExtension : g_playerSetting.wstrAtlasExtension;
+	std::vector<std::string>& strLongerPaths = bAtlasLonger ? atlasPaths : skelPaths;
+	std::vector<std::string>& strShorterPaths = bAtlasLonger ? skelPaths : atlasPaths;
 
-    std::vector<std::wstring> wstrFilePaths;
-    win_filesystem::CreateFilePathList(wstrFolderPath.c_str(), L"*", wstrFilePaths);
+	std::vector<std::wstring> wstrFilePaths;
+	win_filesystem::CreateFilePathList(wstrFolderPath.c_str(), L"*", wstrFilePaths);
 
-    for (const auto& filePath : wstrFilePaths)
-    {
-        const auto EndsWith = [&filePath](const std::wstring& str)
-            -> bool
-            {
-                if (filePath.size() < str.size()) return false;
-                return std::equal(str.rbegin(), str.rend(), filePath.rbegin());
-            };
-
-        if (EndsWith(wstrLongerExtesion))
-        {
-            strLongerPaths.push_back(win_text::NarrowUtf8(filePath));
-        }
-        else if (EndsWith(wstrShorterExtension))
-        {
-            strShorterPaths.push_back(win_text::NarrowUtf8(filePath));
-        }
-    }
+	for (const auto& filePath : wstrFilePaths)
+	{
+		if (filePath.ends_with(wstrLongerExtesion))
+		{
+			strLongerPaths.emplace_back(win_text::NarrowUtf8(filePath));
+		}
+		else if (filePath.ends_with(wstrShorterExtension))
+		{
+			strShorterPaths.emplace_back(win_text::NarrowUtf8(filePath));
+		}
+	}
 }
 /* ---------- Example ----------
  * Atlas path: /texture/character/r18_scenes/r18_10166_2
@@ -185,71 +248,29 @@ void mnms::GetSpineList(const std::wstring& wstrFolderPath, std::vector<std::str
  *------------------------------*/
 bool mnms::DeriveAudioFolderPathFromSpineFolderPath(const std::wstring& wstrAtlasFolderPath, std::wstring& wstrAudioFolderPath)
 {
-    size_t nPos = wstrAtlasFolderPath.find_last_of(L"\\/");
-    if (nPos == std::wstring::npos)return false;
+	std::wstring wstrCharacterId = ExtractCharacterIdFromSpineFolderPath(wstrAtlasFolderPath);
+	if (wstrCharacterId.empty())return false;
+	const wchar_t sceneNumber = wstrAtlasFolderPath.back();
 
-    std::wstring wstrCurrent = wstrAtlasFolderPath.substr(nPos + 1);
-    nPos = wstrCurrent.find(L"r18_");
-    if (nPos == std::wstring::npos)return false;
+	size_t nPos = wstrAtlasFolderPath.find(L"texture");
+	if (nPos == std::wstring::npos)return false;
 
-    size_t nPos2 = wstrCurrent.substr(nPos + 4).rfind(L"_");
-    if (nPos2 == std::wstring::npos)return false;
+	std::wstring wstrVoiceFolder = wstrAtlasFolderPath.substr(0, nPos);
+	wstrVoiceFolder += L"sound\\voice";
 
-    std::wstring wstrCharacterId = wstrCurrent.substr(nPos + 4, nPos2);
+	std::wstring wstrCharacterVoiceFolder = FindPathContainingId(wstrVoiceFolder, wstrCharacterId, nullptr);
+	if (wstrCharacterVoiceFolder.empty())return false;
 
-    nPos = wstrAtlasFolderPath.find(L"texture");
-    if (nPos == std::wstring::npos)return false;
+	wstrCharacterVoiceFolder += L"\\r18\\";
+	wstrCharacterVoiceFolder += wstrCharacterId;
+	wstrCharacterVoiceFolder += ToBookId(wstrCharacterId, sceneNumber);
+	wstrCharacterVoiceFolder += L"_";
+	wstrCharacterVoiceFolder += wstrCharacterId;
+	wstrCharacterVoiceFolder += L"_r18";
 
-    std::wstring wstrVoiceFolder = wstrAtlasFolderPath.substr(0, nPos);
-    wstrVoiceFolder += L"sound\\voice";
+	wstrAudioFolderPath = std::move(wstrCharacterVoiceFolder);
 
-    std::vector<std::wstring> folders;
-    win_filesystem::CreateFilePathList(wstrVoiceFolder.c_str(), nullptr, folders);
-
-    auto IsContained = [&wstrCharacterId](const std::wstring& wstr)
-        -> bool
-        {
-            return wcsstr(wstr.c_str(), wstrCharacterId.c_str()) != nullptr;
-        };
-
-    auto iter = std::find_if(folders.begin(), folders.end(), IsContained);
-    if (iter == folders.end())return false;
-    size_t nIndex = std::distance(folders.begin(), iter);
-
-    std::wstring wstrCharacterVoiceFolder = folders.at(nIndex);
-    wstrCharacterVoiceFolder += L"\\r18\\";
-    wstrCharacterVoiceFolder += wstrCharacterId;
-    if (wstrCharacterId.at(0) == L'3')
-    {
-        /*30005*/
-        switch (wstrCurrent.back())
-        {
-        case L'1':
-            wstrCharacterVoiceFolder += L"c1";
-            break;
-        case L'2':
-            wstrCharacterVoiceFolder += L"d1";
-            break;
-        case L'3':
-            wstrCharacterVoiceFolder += L"e1";
-            break;
-        case L'4':
-            wstrCharacterVoiceFolder += L"f1";
-            break;
-        }
-    }
-    else
-    {
-        wstrCharacterVoiceFolder += wstrCurrent.back() == L'1' ? L"a1" : L"b1";
-    }
-    wstrCharacterVoiceFolder += L"_";
-    wstrCharacterVoiceFolder += wstrCharacterId;
-    wstrCharacterVoiceFolder += L"_";
-    wstrCharacterVoiceFolder += L"r18";
-
-    wstrAudioFolderPath = wstrCharacterVoiceFolder;
-
-    return true;
+	return true;
 }
 /* ---------- Example ----------
  * Atlas path: /advscene/resources/advscene/texture/character/r18_scenes/r18_10166_2
@@ -258,176 +279,154 @@ bool mnms::DeriveAudioFolderPathFromSpineFolderPath(const std::wstring& wstrAtla
  *------------------------------*/
 bool mnms::DeriveEpisodeJsonPathFromSpineFolderPath(const std::wstring& wstrAtlasFolderPath, std::wstring& wstrEpisodeJsonFilePath)
 {
-    /*âòÇÁÇµÇ¢Ç™ã§í èàóùÇ…ÇπÇ∏é ÇµèëÇ´ÅBó]óTÇ™Ç†ÇÍÇŒêÆóù*/
-    size_t nPos = wstrAtlasFolderPath.find_last_of(L"\\/");
-    if (nPos == std::wstring::npos)return false;
+	std::wstring wstrCharacterId = ExtractCharacterIdFromSpineFolderPath(wstrAtlasFolderPath);
+	if (wstrCharacterId.empty())return false;
+	const wchar_t sceneNumber = wstrAtlasFolderPath.back();
 
-    std::wstring wstrCurrent = wstrAtlasFolderPath.substr(nPos + 1);
-    nPos = wstrCurrent.find(L"r18_");
-    if (nPos == std::wstring::npos)return false;
+	size_t nPos = wstrAtlasFolderPath.find(L"advscene");
+	if (nPos == std::wstring::npos)return false;
 
-    size_t nPos2 = wstrCurrent.substr(nPos + 4).rfind(L"_");
-    if (nPos2 == std::wstring::npos)return false;
+	std::wstring wstrBookFolder = wstrAtlasFolderPath.substr(0, nPos);
+	wstrBookFolder += L"advscene\\scenarioexcel\\character";
 
-    std::wstring wstrCharacterId = wstrCurrent.substr(nPos + 4, nPos2);
+	std::wstring wstrBookJson = FindPathContainingId(wstrBookFolder, wstrCharacterId, nullptr);
+	if (wstrBookJson.empty())return false;
 
-    nPos = wstrAtlasFolderPath.find(L"advscene");
-    if (nPos == std::wstring::npos)return false;
+	wstrBookJson += L"\\";
+	wstrBookJson += wstrCharacterId;
+	wstrBookJson += ToBookId(wstrCharacterId, sceneNumber);
+	wstrBookJson += L"_R18.book";
+	wstrBookJson += g_playerSetting.wstrSceneTextExtension;
 
-    std::wstring wstrBookFolder = wstrAtlasFolderPath.substr(0, nPos);
-    wstrBookFolder += L"advscene\\scenarioexcel\\character";
+	wstrEpisodeJsonFilePath = std::move(wstrBookJson);
 
-    std::vector<std::wstring> folders;
-    win_filesystem::CreateFilePathList(wstrBookFolder.c_str(), nullptr, folders);
-
-    auto IsContained = [&wstrCharacterId](const std::wstring& wstr)
-        -> bool
-        {
-            return wcsstr(wstr.c_str(), wstrCharacterId.c_str()) != nullptr;
-        };
-
-    auto iter = std::find_if(folders.begin(), folders.end(), IsContained);
-    if (iter == folders.end())return false;
-    size_t nIndex = std::distance(folders.begin(), iter);
-
-    std::wstring wstrBookJson = folders.at(nIndex);
-    wstrBookJson += L"\\";
-    wstrBookJson += wstrCharacterId;
-    if (wstrCharacterId.at(0) == L'3')
-    {
-        /*30005*/
-        switch (wstrCurrent.back())
-        {
-        case L'1':
-            wstrBookJson += L"c1";
-            break;
-        case L'2':
-            wstrBookJson += L"d1";
-            break;
-        case L'3':
-            wstrBookJson += L"e1";
-            break;
-        case L'4':
-            wstrBookJson += L"f1";
-            break;
-        }
-    }
-    else
-    {
-        wstrBookJson += wstrCurrent.back() == L'1' ? L"a1" : L"b1";
-    }
-    wstrBookJson += L"_R18.book";
-    wstrBookJson += g_playerSetting.wstrSceneTextExtension;
-
-    wstrEpisodeJsonFilePath = wstrBookJson;
-
-    return true;
+	return true;
 }
-/*ãrñ{ì«Ç›éÊÇË*/
-bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::TextDatum>& textData)
+/*ËÑöÊú¨Ë™≠„ÅøÂèñ„Çä*/
+bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames)
 {
-    bool bRet = SetVoiceFolderPath(wstrFilePath);
-    if (!bRet)return false;
+	bool bRet = SetVoiceFolderPath(wstrFilePath);
+	if (!bRet)return false;
 
-    std::string strScenarioFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
-    if (!strScenarioFile.empty())
-    {
-        std::string strError;
+	std::string strScenarioFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
+	if (!strScenarioFile.empty())
+	{
+		std::string strError;
+		size_t nCurrentAnimationIndex = 0;
 
-        nlohmann::json nlJson;
-        try
-        {
-            nlJson = nlohmann::json::parse(strScenarioFile);
+		try
+		{
+			nlohmann::json nlJson = nlohmann::json::parse(strScenarioFile);
 
-            const nlohmann::json& jData = nlJson.at("importGridList").at(0).at("rows");
+			const nlohmann::json& jData = nlJson.at("importGridList").at(0).at("rows");
 
-            /*çÄñ⁄ñºÇÕîÚÇŒÇ∑*/
-            for (size_t i = 1; i < jData.size(); ++i)
-            {
-                const nlohmann::json& jRow = jData.at(i).at("strings");
+			/*È†ÖÁõÆÂêç„ÅØÈ£õ„Å∞„Åô*/
+			for (size_t i = 1; i < jData.size(); ++i)
+			{
+				const nlohmann::json& jRow = jData[i].at("strings");
+				if (jRow.empty())continue;
 
-                if (jRow.size() > 9)
-                {
-                    adv::TextDatum t;
+				if (jRow.size() > CommandIndex::Arg3)
+				{
+					const std::string& arg3 = jRow[CommandIndex::Arg3];
+					if (arg3 == "layer_R18") /* SpineÂãï‰ΩúÊåáÂÆö */
+					{
+						animationNames.emplace_back(jRow[CommandIndex::Arg2]);
+						nCurrentAnimationIndex = animationNames.size() - 1;
 
-                    const std::string strMsg = std::string(jRow[9]);
-                    if (strMsg.empty())continue;
+						/* ÂØæÂøúÊñáÁ´†„Åå„Å™„ÅÑ„ÅÆ„ÅßÂâçÊñáÁ´†„Éá„Éº„Çø„Çí‰∏äÊõ∏„Åç */
+						if (animationNames.back() == "Finish" && !textData.empty())
+						{
+							textData.back().nAnimationIndex = nCurrentAnimationIndex;
+						}
+						continue;
+					}
+				}
+				if (jRow.size() > CommandIndex::Text)
+				{
+					adv::TextDatum t;
 
-                    t.wstrText.reserve(128);
-                    const std::string strName = std::string(jRow[2]);
-                    if (!strName.empty())
-                    {
-                        t.wstrText = win_text::WidenUtf8(strName);
-                        t.wstrText += L":\n";
-                    }
-                    t.wstrText += win_text::WidenUtf8(strMsg);
-                    EliminateTag(t.wstrText);
+					const std::string& strMsg = jRow[CommandIndex::Text];
+					if (strMsg.empty())continue;
 
-                    if (jRow.size() > 11)
-                    {
-                        const std::string strVoicePath = std::string(jRow[11]);
-                        if (!strVoicePath.empty())
-                        {
-                            t.wstrVoicePath = VoiceRelativeUrlToFilePath(win_text::WidenUtf8(strVoicePath));
-                        }
-                    }
+					t.wstrText.reserve(128);
+					const std::string& strName = jRow[CommandIndex::Arg1];
+					if (!strName.empty())
+					{
+						t.wstrText = win_text::WidenUtf8(strName);
+						t.wstrText += L":\n";
+					}
+					t.wstrText += win_text::WidenUtf8(strMsg);
+					EliminateTag(t.wstrText);
 
-                    if (!t.wstrText.empty())
-                    {
-                        textData.push_back(t);
-                    }
-                }
-            }
-        }
-        catch (nlohmann::json::exception e)
-        {
-            strError = e.what();
-        }
+					if (jRow.size() > CommandIndex::Voice)
+					{
+						const std::string& strVoicePath = jRow[CommandIndex::Voice];
+						if (!strVoicePath.empty())
+						{
+							t.wstrVoicePath = VoiceRelativeUrlToFilePath(win_text::WidenUtf8(strVoicePath));
+						}
+					}
 
-        if (!strError.empty())
-        {
-            ::MessageBoxA(nullptr, strError.c_str(), "Parse error", MB_ICONERROR);
-            return false;
-        }
-    }
+					if (!t.wstrText.empty())
+					{
+						t.nAnimationIndex = nCurrentAnimationIndex;
 
-    if (textData.empty())
-    {
-        /*ë‰ñ{Ç»ÇµÅEì«Ç›éÊÇËé∏îs*/
-        std::wstring wstrAudioFolderPath;
-        mnms::DeriveAudioFolderPathFromSpineFolderPath(wstrFilePath, wstrAudioFolderPath);
+						textData.push_back(std::move(t));
+					}
+				}
+			}
+		}
+		catch (nlohmann::json::exception &e)
+		{
+			strError = e.what();
+		}
 
-        std::vector<std::wstring> audioFilePaths;
-        win_filesystem::CreateFilePathList(wstrAudioFolderPath.c_str(), g_playerSetting.wstrVoiceExtension.c_str(), audioFilePaths);
+		if (!strError.empty())
+		{
+			::MessageBoxA(nullptr, strError.c_str(), "Parse error", MB_ICONERROR);
+			return false;
+		}
+	}
 
-        for (size_t i = 0; i < audioFilePaths.size(); ++i)
-        {
-            textData.push_back(adv::TextDatum{ L"", audioFilePaths.at(i) });
-        }
-    }
+	if (textData.empty())
+	{
+		/*Âè∞Êú¨„Å™„Åó„ÉªË™≠„ÅøÂèñ„ÇäÂ§±Êïó*/
+		std::wstring wstrAudioFolderPath;
+		mnms::DeriveAudioFolderPathFromSpineFolderPath(wstrFilePath, wstrAudioFolderPath);
 
-    return !textData.empty();
+		std::vector<std::wstring> audioFilePaths;
+		win_filesystem::CreateFilePathList(wstrAudioFolderPath.c_str(), g_playerSetting.wstrVoiceExtension.c_str(), audioFilePaths);
+
+		for (const auto& audioFilePath : audioFilePaths)
+		{
+			textData.emplace_back(adv::TextDatum{ L"", audioFilePath });
+		}
+	}
+
+	return !textData.empty();
 }
-/*ï`âÊèúäOîªíËä÷êî*/
+/*ÊèèÁîªÈô§Â§ñÂà§ÂÆöÈñ¢Êï∞*/
 bool mnms::IsSlotToBeLeftOut(const char* szSlotName, size_t nSlotNameLength)
 {
-    const char* szExclusionList[] = { "Mask", "White" };
-    if (szSlotName != nullptr)
-    {
-        for (size_t i = 0; i < sizeof(szExclusionList) / sizeof(szExclusionList[0]); ++i)
-        {
-            if (strstr(szSlotName, szExclusionList[i]) != nullptr)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
+	if (szSlotName != nullptr)
+	{
+		constexpr const char* const ExclusionSlots[] = { "Mask", "White" };
+		for (const auto& ExclusionSlot : ExclusionSlots)
+		{
+			if (strstr(szSlotName, ExclusionSlot) != nullptr)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 unsigned int mnms::GetDisplayRefreshRate()
 {
-    DEVMODE sDevMode{};
-    ::EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &sDevMode);
-    return sDevMode.dmDisplayFrequency;
+	DEVMODE sDevMode{};
+	::EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &sDevMode);
+	return sDevMode.dmDisplayFrequency;
 }

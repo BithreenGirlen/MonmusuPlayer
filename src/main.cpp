@@ -27,65 +27,65 @@
 #include "sfml_main_window.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR    lpCmdLine,
+	_In_ int       nCmdShow)
 {
-    ::setlocale(LC_ALL, ".utf8");
+	::setlocale(LC_ALL, ".utf8");
 
-    if (!mnms::InitialiseSetting())return 0;
+	if (!mnms::InitialiseSetting())return 0;
 
-    std::wstring wstrPickedFolder = win_dialogue::SelectWorkFolder(nullptr);
-    if (!wstrPickedFolder.empty())
-    {
-        CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
-        sfmlMainWindow.SetFont(mnms::GetFontFilePath(), true, true);
-        sfmlMainWindow.GetWindow()->setFramerateLimit(mnms::GetDisplayRefreshRate());
+	std::wstring wstrPickedFolder = win_dialogue::SelectWorkFolder(nullptr);
+	if (!wstrPickedFolder.empty())
+	{
+		CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
+		sfmlMainWindow.SetFont(mnms::GetFontFilePath(), true, true);
+		sfmlMainWindow.GetWindow()->setFramerateLimit(mnms::GetDisplayRefreshRate());
 
-        std::vector<std::wstring> folders;
-        size_t nFolderIndex = 0;
-        win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, nullptr, folders, &nFolderIndex);
-        for (;;)
-        {
-            const std::wstring& wstrFolderPath = folders[nFolderIndex];
+		std::vector<std::wstring> folders;
+		size_t nFolderIndex = 0;
+		win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, nullptr, folders, &nFolderIndex);
+		for (;;)
+		{
+			const std::wstring& wstrFolderPath = folders[nFolderIndex];
 
-            std::vector<std::string> atlasPaths;
-            std::vector<std::string> skelPaths;
-            mnms::GetSpineList(wstrFolderPath, atlasPaths, skelPaths);
-            if (skelPaths.empty())break;
+			std::vector<std::string> atlasPaths;
+			std::vector<std::string> skelPaths;
+			mnms::GetSpineList(wstrFolderPath, atlasPaths, skelPaths);
+			if (skelPaths.empty())break;
 
-            std::wstring wstrBookPath;
-            mnms::DeriveEpisodeJsonPathFromSpineFolderPath(wstrFolderPath, wstrBookPath);
-            std::vector<adv::TextDatum> textData;
-            std::vector<std::string> animationNames;
-            if (!wstrBookPath.empty())
-            {
-                mnms::ReadScenarioFile(wstrBookPath, textData);
-            }
+			std::wstring wstrBookPath;
+			mnms::DeriveEpisodeJsonPathFromSpineFolderPath(wstrFolderPath, wstrBookPath);
+			std::vector<adv::TextDatum> textData;
+			std::vector<std::string> animationNames;
+			if (!wstrBookPath.empty())
+			{
+				mnms::ReadScenarioFile(wstrBookPath, textData, animationNames);
+			}
 
-            bool bRet = sfmlMainWindow.SetSpineFromFile(atlasPaths, skelPaths, mnms::IsSkelBinary());
-            if (!bRet)break;
+			bool bRet = sfmlMainWindow.SetSpineFromFile(atlasPaths, skelPaths, mnms::IsSkelBinary());
+			if (!bRet)break;
 
-            sfmlMainWindow.SetScenarioData(textData, animationNames);
-            sfmlMainWindow.SetSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
+			sfmlMainWindow.SetScenarioData(textData, animationNames);
+			sfmlMainWindow.SetSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
 
-            int iRet = sfmlMainWindow.Display();
-            if (iRet == 1)
-            {
-                ++nFolderIndex;
-                if (nFolderIndex >= folders.size())nFolderIndex = 0;
-            }
-            else if (iRet == 2)
-            {
-                --nFolderIndex;
-                if (nFolderIndex >= folders.size())nFolderIndex = folders.size() - 1;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
+			int iRet = sfmlMainWindow.Display();
+			if (iRet == 1)
+			{
+				++nFolderIndex;
+				if (nFolderIndex >= folders.size())nFolderIndex = 0;
+			}
+			else if (iRet == 2)
+			{
+				--nFolderIndex;
+				if (nFolderIndex >= folders.size())nFolderIndex = folders.size() - 1;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
 
-    return 0;
+	return 0;
 }

@@ -9,6 +9,8 @@ namespace adv
 	{
 		std::wstring wstrText;
 		std::wstring wstrVoicePath;
+
+		size_t nAnimationIndex = 0;
 	};
 }
 #endif // !ADV_H_

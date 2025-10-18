@@ -35,9 +35,6 @@ int CSfmlMainWindow::Display()
 	m_sfmlSpinePlayer->ResetScale();
 	ResizeWindow();
 
-	m_animationIndex = 0;
-	ShiftAnimation();
-
 	UpdateMessageText();
 
 	sf::Vector2i iMouseStartPos;
@@ -86,7 +83,7 @@ int CSfmlMainWindow::Display()
 					int iX = iMouseStartPos.x - event.position.x;
 					int iY = iMouseStartPos.y - event.position.y;
 
-					if (iX == 0 && iY == 0 && m_animationNames.empty())
+					if (iX == 0 && iY == 0)
 					{
 						ShiftAnimation();
 					}
@@ -172,6 +169,9 @@ int CSfmlMainWindow::Display()
 				case sf::Keyboard::Scancode::T:
 					ToggleTextVisibility();
 					break;
+				case sf::Keyboard::Scancode::Q:
+					ToggleImageSync();
+					break;
 				case sf::Keyboard::Scancode::Escape:
 					m_window->close();
 					break;
@@ -253,21 +253,6 @@ bool CSfmlMainWindow::SaveCurrentFrameImage()
 
 	return bRet;
 }
-
-void CSfmlMainWindow::ShiftAnimation()
-{
-	constexpr const char* const animations[] = { "Wait", "Normal", "Fast", "Finish", "After" };
-	constexpr size_t animationCount = sizeof(animations) / sizeof(animations[0]);
-
-	if (m_animationIndex < animationCount)
-	{
-		m_sfmlSpinePlayer->SetAnimationByName(animations[m_animationIndex]);
-	}
-	if (++m_animationIndex >= animationCount)
-	{
-		m_animationIndex = 0;
-	}
-}
 /*字体設定*/
 bool CSfmlMainWindow::SetFont(const std::string& strFilePath, bool bBold, bool bItalic)
 {
@@ -303,6 +288,11 @@ void CSfmlMainWindow::SetScenarioData(std::vector<adv::TextDatum>& textData, std
 	{
 		m_pAudioPlayer = std::make_unique<CMfMediaPlayer>();
 	}
+
+	if (!m_animationNames.empty())
+	{
+		m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[0].c_str());
+	}
 }
 /*文字色切り替え*/
 void CSfmlMainWindow::ToggleTextColor()
@@ -314,6 +304,15 @@ void CSfmlMainWindow::ToggleTextColor()
 void CSfmlMainWindow::ToggleTextVisibility()
 {
 	m_bTextHidden ^= true;
+}
+
+void CSfmlMainWindow::ToggleImageSync()
+{
+	m_bImageSynced ^= true;
+	if (m_bImageSynced)
+	{
+		CheckAnimationTrack();
+	}
 }
 /*文章切り替え是否確認*/
 void CSfmlMainWindow::CheckTimer()
@@ -350,30 +349,20 @@ void CSfmlMainWindow::ShiftMessageText(bool bForward)
 /*表示文章変更適用*/
 void CSfmlMainWindow::UpdateMessageText()
 {
-	if (m_textData.empty())return;
+	if (m_nTextIndex >= m_textData.size())return;
 
-	const adv::TextDatum& textDatum = m_textData.at(m_nTextIndex);
+	const adv::TextDatum& textDatum = m_textData[m_nTextIndex];
 	std::wstring wstr = textDatum.wstrText;
-
-	constexpr unsigned int kLineThreashold = 46;
-	for (size_t i = kLineThreashold; i < wstr.size(); i += kLineThreashold)
-	{
-		wstr.insert(i, L"\n");
-	}
 	if (!wstr.empty() && wstr.back() != L'\n') wstr += L"\n ";
 
 	wstr += std::to_wstring(m_nTextIndex + 1) + L"/" + std::to_wstring(m_textData.size());
 	m_msgText->setString(wstr);
 
 	/* Checks if animation has to be switched or not. */
-	//if (m_nLastAnimationIndex != textDatum.nAnimationIndex)
-	//{
-	//	if (textDatum.nAnimationIndex < m_animationNames.size())
-	//	{
-	//		m_nLastAnimationIndex = textDatum.nAnimationIndex;
-	//		m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
-	//	}
-	//}
+	if (m_bImageSynced)
+	{
+		CheckAnimationTrack();
+	}
 
 	if (!textDatum.wstrVoicePath.empty())
 	{
@@ -383,4 +372,35 @@ void CSfmlMainWindow::UpdateMessageText()
 		}
 	}
 	m_textClock.restart();
+}
+void CSfmlMainWindow::ShiftAnimation()
+{
+	if (m_animationNames.empty())
+	{
+		m_sfmlSpinePlayer->ShiftAnimation();
+	}
+	else if (!m_bImageSynced)
+	{
+		if (++m_nLastAnimationIndex >= m_animationNames.size())
+		{
+			m_nLastAnimationIndex = 0;
+		}
+
+		m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
+	}
+}
+
+void CSfmlMainWindow::CheckAnimationTrack()
+{
+	if (m_nTextIndex >= m_textData.size())return;
+
+	const adv::TextDatum& textDatum = m_textData[m_nTextIndex];
+	if (m_nLastAnimationIndex != textDatum.nAnimationIndex)
+	{
+		if (textDatum.nAnimationIndex < m_animationNames.size())
+		{
+			m_nLastAnimationIndex = textDatum.nAnimationIndex;
+			m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
+		}
+	}
 }
