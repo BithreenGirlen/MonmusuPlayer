@@ -7,7 +7,7 @@
 class CSfmlSpineDrawer : public sf::Drawable
 {
 public:
-	CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData, spine::AnimationStateData* pStateData = nullptr);
+	CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData);
 	~CSfmlSpineDrawer();
 
 	spine::Skeleton* skeleton = nullptr;
@@ -24,8 +24,6 @@ public:
 
 	sf::FloatRect GetBoundingBox() const;
 private:
-	bool m_hasOwnAnimationStateData = false;
-
 	mutable spine::SkeletonClipping m_clipper;
 
 	mutable spine::Vector<float> m_worldVertices;

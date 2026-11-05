@@ -2,12 +2,10 @@
 
 #include "sfml_spine.h"
 
-namespace spine
+spine::SpineExtension* spine::getDefaultExtension()
 {
-	SpineExtension* getDefaultExtension()
-	{
-		return new DefaultSpineExtension();
-	}
+	static DefaultSpineExtension s_defaultSpineExtension;
+	return &s_defaultSpineExtension;
 }
 
 static sf::BlendMode g_sfmlBlendModeNormalPma = sf::BlendMode(sf::BlendMode::Factor::One, sf::BlendMode::Factor::OneMinusSrcAlpha);
@@ -23,7 +21,7 @@ static sf::BlendMode g_sfmlBlendModeMultiply = sf::BlendMode
 	sf::BlendMode::Equation::Add
 );
 
-CSfmlSpineDrawer::CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData, spine::AnimationStateData* pAnimationStateData)
+CSfmlSpineDrawer::CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData)
 {
 	spine::Bone::setYDown(true);
 
@@ -31,13 +29,7 @@ CSfmlSpineDrawer::CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData, spine::An
 	m_sfmlVertices.setPrimitiveType(sf::PrimitiveType::Triangles);
 
 	skeleton = new spine::Skeleton(pSkeletonData);
-
-	if (pAnimationStateData == nullptr)
-	{
-		pAnimationStateData = new spine::AnimationStateData(pSkeletonData);
-		m_hasOwnAnimationStateData = true;
-	}
-
+	spine::AnimationStateData* pAnimationStateData = new spine::AnimationStateData(pSkeletonData);
 	animationState = new spine::AnimationState(pAnimationStateData);
 
 	m_quadIndices.add(0);
@@ -52,10 +44,8 @@ CSfmlSpineDrawer::~CSfmlSpineDrawer()
 {
 	if (animationState != nullptr)
 	{
-		if (m_hasOwnAnimationStateData)
-		{
-			delete animationState->getData();
-		}
+		spine::AnimationStateData* pAnimationStateData = animationState->getData();
+		delete pAnimationStateData;
 
 		delete animationState;
 	}
