@@ -64,7 +64,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			if (skelPaths.empty())break;
 
 			std::wstring wstrBookPath;
-			mnms::DeriveEpisodeJsonPathFromSpineFolderPath(wstrFolderPath, wstrBookPath);
+			mnms::DeriveScenarioFilePathFromSpineFolderPath(wstrFolderPath, wstrBookPath);
 			std::vector<adv::TextDatum> textData;
 			std::vector<std::string> animationNames;
 			if (!wstrBookPath.empty())

@@ -15,9 +15,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 /* Dependency */
 #include <spine/spine.h>
 #include <SFML/Graphics.hpp>
-
-

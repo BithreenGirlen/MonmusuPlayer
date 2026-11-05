@@ -12,11 +12,11 @@ namespace mnms
 	const std::string& GetFontFilePath();
 	const bool IsSkelBinary();
 
-	void GetSpineList(const std::wstring& wstrFolderPath, std::vector<std::string>& atlasPaths, std::vector<std::string>& skelPaths);
-	bool DeriveAudioFolderPathFromSpineFolderPath(const std::wstring& wstrAtlasFolderPath, std::wstring& wstrAudioFolderPath);
-	bool DeriveEpisodeJsonPathFromSpineFolderPath(const std::wstring& wstrAtlasFolderPath, std::wstring& wstrEpisodeJsonFilePath);
+	void GetSpineList(const std::wstring& folderPath, std::vector<std::string>& atlasPaths, std::vector<std::string>& skelPaths);
+	bool DeriveVoiceFolderPathFromSpineFolderPath(const std::wstring& sceneSpineFolderPath, std::wstring& sceneVoiceFolderPath);
+	bool DeriveScenarioFilePathFromSpineFolderPath(const std::wstring& sceneSpinesFolderPath, std::wstring& sceneScenarioFilePath);
 
-	bool ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
+	bool ReadScenarioFile(const std::wstring& scenarioFilePath, std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
 
 	bool IsSlotToBeLeftOut(const char* szSlotName, size_t nSlotNameLength);
 
