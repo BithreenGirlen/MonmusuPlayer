@@ -24,11 +24,9 @@ namespace mnms
 
 	static bool ReadSettingFile(SPlayerSetting& playerSetting)
 	{
-		std::wstring wstrFilePath = win_filesystem::GetCurrentProcessPath() + L"\\setting.txt";
-		std::string strFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
+		std::wstring settingFilePath = std::wstring(win_filesystem::GetCurrentProcessPath()).append(L"setting.txt");
+		std::string strFile = win_filesystem::LoadFileAsString(settingFilePath.c_str());
 		if (strFile.empty())return false;
-
-		std::string strError;
 
 		try
 		{
@@ -52,13 +50,14 @@ namespace mnms
 			playerSetting.strFontFilePath = nlJson.at("fontPath");
 
 		}
-		catch (nlohmann::json::exception e)
+		catch (const nlohmann::json::exception& e)
 		{
-			strError = e.what();
-			::MessageBoxA(nullptr, strError.c_str(), "Setting error", MB_ICONERROR);
+			win_dialogue::ShowErrorMessageBox("Setting error", e.what());
+
+			return false;
 		}
 
-		return strError.empty();
+		return true;
 	}
 
 	struct CommandIndex abstract final
@@ -124,10 +123,10 @@ namespace mnms
 	}
 
 	/* ID対応先探索 */
-	static std::wstring FindPathContainingId(const std::wstring& targetFolder, const std::wstring& wstrId, const wchar_t* pwzFileExtension)
+	static std::wstring FindPathContainingId(const std::wstring& targetFolder, const std::wstring& wstrId, const std::wstring_view fileExtension)
 	{
 		std::vector<std::wstring> paths;
-		win_filesystem::CreateFilePathList(targetFolder.c_str(), pwzFileExtension, paths);
+		win_filesystem::CreateFilePathList(targetFolder, fileExtension, paths);
 		const auto IsContained = [&wstrId](const std::wstring& wstr)
 			-> bool
 			{
@@ -227,7 +226,7 @@ void mnms::GetSpineList(const std::wstring& wstrFolderPath, std::vector<std::str
 	std::vector<std::string>& strShorterPaths = bAtlasLonger ? skelPaths : atlasPaths;
 
 	std::vector<std::wstring> wstrFilePaths;
-	win_filesystem::CreateFilePathList(wstrFolderPath.c_str(), L"*", wstrFilePaths);
+	win_filesystem::CreateFilePathList(wstrFolderPath, L"*", wstrFilePaths);
 
 	for (const auto& filePath : wstrFilePaths)
 	{
@@ -258,7 +257,7 @@ bool mnms::DeriveAudioFolderPathFromSpineFolderPath(const std::wstring& wstrAtla
 	std::wstring wstrVoiceFolder = wstrAtlasFolderPath.substr(0, nPos);
 	wstrVoiceFolder += L"sound\\voice";
 
-	std::wstring wstrCharacterVoiceFolder = FindPathContainingId(wstrVoiceFolder, wstrCharacterId, nullptr);
+	std::wstring wstrCharacterVoiceFolder = FindPathContainingId(wstrVoiceFolder, wstrCharacterId, {});
 	if (wstrCharacterVoiceFolder.empty())return false;
 
 	wstrCharacterVoiceFolder += L"\\r18\\";
@@ -289,7 +288,7 @@ bool mnms::DeriveEpisodeJsonPathFromSpineFolderPath(const std::wstring& wstrAtla
 	std::wstring wstrBookFolder = wstrAtlasFolderPath.substr(0, nPos);
 	wstrBookFolder += L"advscene\\scenarioexcel\\character";
 
-	std::wstring wstrBookJson = FindPathContainingId(wstrBookFolder, wstrCharacterId, nullptr);
+	std::wstring wstrBookJson = FindPathContainingId(wstrBookFolder, wstrCharacterId, {});
 	if (wstrBookJson.empty())return false;
 
 	wstrBookJson += L"\\";
@@ -311,7 +310,6 @@ bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::T
 	std::string strScenarioFile = win_filesystem::LoadFileAsString(wstrFilePath.c_str());
 	if (!strScenarioFile.empty())
 	{
-		std::string strError;
 		size_t nCurrentAnimationIndex = 0;
 
 		try
@@ -377,14 +375,9 @@ bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::T
 				}
 			}
 		}
-		catch (nlohmann::json::exception &e)
+		catch (const nlohmann::json::exception& e)
 		{
-			strError = e.what();
-		}
-
-		if (!strError.empty())
-		{
-			::MessageBoxA(nullptr, strError.c_str(), "Parse error", MB_ICONERROR);
+			win_dialogue::ShowErrorMessageBox("Parse error", e.what());
 			return false;
 		}
 	}
@@ -396,7 +389,7 @@ bool mnms::ReadScenarioFile(const std::wstring& wstrFilePath, std::vector<adv::T
 		mnms::DeriveAudioFolderPathFromSpineFolderPath(wstrFilePath, wstrAudioFolderPath);
 
 		std::vector<std::wstring> audioFilePaths;
-		win_filesystem::CreateFilePathList(wstrAudioFolderPath.c_str(), g_playerSetting.wstrVoiceExtension.c_str(), audioFilePaths);
+		win_filesystem::CreateFilePathList(wstrAudioFolderPath, g_playerSetting.wstrVoiceExtension, audioFilePaths);
 
 		for (const auto& audioFilePath : audioFilePaths)
 		{
