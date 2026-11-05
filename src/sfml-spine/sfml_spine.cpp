@@ -31,13 +31,6 @@ CSfmlSpineDrawer::CSfmlSpineDrawer(spine::SkeletonData* pSkeletonData)
 	skeleton = new spine::Skeleton(pSkeletonData);
 	spine::AnimationStateData* pAnimationStateData = new spine::AnimationStateData(pSkeletonData);
 	animationState = new spine::AnimationState(pAnimationStateData);
-
-	m_quadIndices.add(0);
-	m_quadIndices.add(1);
-	m_quadIndices.add(2);
-	m_quadIndices.add(2);
-	m_quadIndices.add(3);
-	m_quadIndices.add(0);
 }
 
 CSfmlSpineDrawer::~CSfmlSpineDrawer()
@@ -75,11 +68,13 @@ void CSfmlSpineDrawer::Update(float fDelta)
 
 void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates renderStates) const
 {
+	static unsigned short s_quadIndices[] = { 0, 1, 2, 2, 3, 0 };
+
 	if (skeleton == nullptr || animationState == nullptr)return;
 
 	if (skeleton->getColor().a == 0) return;
 
-	for (unsigned i = 0; i < skeleton->getSlots().size(); ++i)
+	for (size_t i = 0; i < skeleton->getSlots().size(); ++i)
 	{
 		spine::Slot& slot = *skeleton->getDrawOrder()[i];
 		spine::Attachment* pAttachment = slot.getAttachment();
@@ -98,7 +93,8 @@ void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates ren
 
 		spine::Vector<float>* pVertices = &m_worldVertices;
 		spine::Vector<float>* pAttachmentUvs = nullptr;
-		spine::Vector<unsigned short>* pIndices = nullptr;
+		unsigned short* pIndices = nullptr;
+		size_t nIndicesCount = 0;
 
 		spine::Color* pAttachmentColor = nullptr;
 
@@ -122,7 +118,8 @@ void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates ren
 			pRegionAttachment->computeWorldVertices(slot.getBone(), m_worldVertices, 0, 2);
 #endif
 			pAttachmentUvs = &pRegionAttachment->getUVs();
-			pIndices = &m_quadIndices;
+			pIndices = s_quadIndices;
+			nIndicesCount = sizeof(s_quadIndices) / sizeof(unsigned short);
 
 #ifdef SPINE_4_1_OR_LATER
 			spine::AtlasRegion* pAtlasRegion = static_cast<spine::AtlasRegion*>(pRegionAttachment->getRegion());
@@ -152,7 +149,8 @@ void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates ren
 			pMeshAttachment->computeWorldVertices(slot, 0, pMeshAttachment->getWorldVerticesLength(), m_worldVertices, 0, 2);
 
 			pAttachmentUvs = &pMeshAttachment->getUVs();
-			pIndices = &pMeshAttachment->getTriangles();
+			pIndices = pMeshAttachment->getTriangles().buffer();
+			nIndicesCount = pMeshAttachment->getTriangles().size();
 
 #ifdef SPINE_4_1_OR_LATER
 			spine::AtlasRegion* pAtlasRegion = static_cast<spine::AtlasRegion*>(pMeshAttachment->getRegion());
@@ -177,53 +175,52 @@ void CSfmlSpineDrawer::draw(sf::RenderTarget& renderTarget, sf::RenderStates ren
 
 		if (m_clipper.isClipping())
 		{
-			m_clipper.clipTriangles(m_worldVertices, *pIndices, *pAttachmentUvs, 2);
+			m_clipper.clipTriangles(m_worldVertices.buffer(), pIndices, nIndicesCount, pAttachmentUvs->buffer(), 2);
+			if (m_clipper.getClippedTriangles().size() == 0)
+			{
+				m_clipper.clipEnd(slot);
+				continue;
+			}
 			pVertices = &m_clipper.getClippedVertices();
 			pAttachmentUvs = &m_clipper.getClippedUVs();
-			pIndices = &m_clipper.getClippedTriangles();
+			pIndices = m_clipper.getClippedTriangles().buffer();
+			nIndicesCount = m_clipper.getClippedTriangles().size();
 		}
 
 		const spine::Color& skeletonColor = skeleton->getColor();
 		const spine::Color& slotColor = slot.getColor();
-		const spine::Color tint
+		const spine::Color spineVertexColor
 		(
-			skeletonColor.r * slotColor.r * pAttachmentColor->r,
-			skeletonColor.g * slotColor.g * pAttachmentColor->g,
-			skeletonColor.b * slotColor.b * pAttachmentColor->b,
-			skeletonColor.a * slotColor.a * pAttachmentColor->a
+			skeletonColor.r* slotColor.r* pAttachmentColor->r,
+			skeletonColor.g* slotColor.g* pAttachmentColor->g,
+			skeletonColor.b* slotColor.b* pAttachmentColor->b,
+			skeletonColor.a* slotColor.a* pAttachmentColor->a
+		);
+		const sf::Color sfmlVertexColor
+		(
+			static_cast<std::uint8_t>(spineVertexColor.r * 255.f * (isAlphaPremultiplied ? spineVertexColor.a : 1.f)),
+			static_cast<std::uint8_t>(spineVertexColor.g * 255.f * (isAlphaPremultiplied ? spineVertexColor.a : 1.f)),
+			static_cast<std::uint8_t>(spineVertexColor.b * 255.f * (isAlphaPremultiplied ? spineVertexColor.a : 1.f)),
+			static_cast<std::uint8_t>(spineVertexColor.a * 255.f)
 		);
 		const sf::Vector2u& textureSize = pSfmlTexture->getSize();
 
-		m_sfmlVertices.clear();
-		/*
-		* The two tasks are required because SFML does not support indexed drawing.
-		* 1. Map index to vertex when adding.
-		* 2. Multiply alpha to colours if necessary.
-		*/
-		for (int ii = 0; ii < pIndices->size(); ++ii)
+		m_sfmlVertices.resize(nIndicesCount);
+		for (size_t ii = 0; ii < nIndicesCount; ++ii)
 		{
-			sf::Vertex sfmlVertex;
+			sf::Vertex& sfmlVertex = m_sfmlVertices[ii];
 
-			sfmlVertex.position.x = (*pVertices)[(*pIndices)[ii] * 2LL];
-			sfmlVertex.position.y = (*pVertices)[(*pIndices)[ii] * 2LL + 1];
+			sfmlVertex.position.x = (*pVertices)[pIndices[ii] * 2LL];
+			sfmlVertex.position.y = (*pVertices)[pIndices[ii] * 2LL + 1];
 
-			sfmlVertex.color.r = (std::uint8_t)(tint.r * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
-			sfmlVertex.color.g = (std::uint8_t)(tint.g * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
-			sfmlVertex.color.b = (std::uint8_t)(tint.b * 255.f * (isAlphaPremultiplied ? tint.a : 1.f));
-			sfmlVertex.color.a = (std::uint8_t)(tint.a * 255.f);
+			sfmlVertex.color = sfmlVertexColor;
 
-			sfmlVertex.texCoords.x = (*pAttachmentUvs)[(*pIndices)[ii] * 2LL] * textureSize.x;
-			sfmlVertex.texCoords.y = (*pAttachmentUvs)[(*pIndices)[ii] * 2LL + 1] * textureSize.y;
-
-			m_sfmlVertices.append(sfmlVertex);
+			sfmlVertex.texCoords.x = (*pAttachmentUvs)[pIndices[ii] * 2LL] * textureSize.x;
+			sfmlVertex.texCoords.y = (*pAttachmentUvs)[pIndices[ii] * 2LL + 1] * textureSize.y;
 		}
 
 		sf::BlendMode sfmlBlendMode;
-		/*
-		* Some slots specify BlendMode_Multiply though, BlendMode_Normal seems better;
-		* But in order not to overwrite the slot data, copy to temporary variable when forcing.
-		*/
-		spine::BlendMode spineBlnedMode = isToForceBlendModeNormal ? spine::BlendMode_Normal : slot.getData().getBlendMode();
+		const spine::BlendMode spineBlnedMode = isToForceBlendModeNormal ? spine::BlendMode_Normal : slot.getData().getBlendMode();
 		switch (spineBlnedMode)
 		{
 		case spine::BlendMode_Additive:

@@ -28,8 +28,6 @@ private:
 
 	mutable spine::Vector<float> m_worldVertices;
 	mutable sf::VertexArray m_sfmlVertices;
-	/*SFML does not have indices.*/
-	mutable spine::Vector<unsigned short> m_quadIndices;
 	
 	mutable spine::Vector<spine::String> m_leaveOutList;
 	bool IsToBeLeftOut(const spine::String &slotName) const;
