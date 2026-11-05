@@ -326,7 +326,7 @@ void CSfmlMainWindow::CheckTimer()
 {
 	constexpr float fAutoPlayInterval = 2.f;
 	float fSecond = m_textClock.getElapsedTime().asSeconds();
-	if (m_pAudioPlayer.get() != nullptr && m_pAudioPlayer.get()->IsEnded() && fSecond > fAutoPlayInterval)
+	if (m_pAudioPlayer.get() != nullptr && m_pAudioPlayer.get()->isEnded() && fSecond > fAutoPlayInterval)
 	{
 		if (m_nTextIndex < m_textData.size() - 1)
 		{
@@ -375,7 +375,7 @@ void CSfmlMainWindow::UpdateMessageText()
 	{
 		if (m_pAudioPlayer.get() != nullptr)
 		{
-			m_pAudioPlayer->Play(textDatum.wstrVoicePath.c_str());
+			m_pAudioPlayer->play(textDatum.wstrVoicePath.c_str());
 		}
 	}
 	m_textClock.restart();
