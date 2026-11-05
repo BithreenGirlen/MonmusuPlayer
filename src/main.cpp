@@ -26,6 +26,13 @@
 
 #include "sfml_main_window.h"
 
+struct ComInit
+{
+	HRESULT m_hrComInit;
+	ComInit() : m_hrComInit(::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)) {}
+	~ComInit() { if (SUCCEEDED(m_hrComInit)) ::CoUninitialize(); }
+};
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPWSTR    lpCmdLine,
@@ -33,12 +40,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	::setlocale(LC_ALL, ".utf8");
 
-	if (!mnms::InitialiseSetting())return 0;
+	ComInit comInit;
 
-	std::wstring wstrPickedFolder = win_dialogue::SelectWorkFolder(nullptr);
+	if (!mnms::InitialiseSetting())return 0;
+	CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
+
+	std::wstring wstrPickedFolder = win_dialogue::SelectFolder(L"Select advscene/resources/advscene/texture/character/r18_scenes/r18_XXXXX_Y folder", sfmlMainWindow.GetWindow()->getNativeHandle());
 	if (!wstrPickedFolder.empty())
 	{
-		CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
 		sfmlMainWindow.SetFont(mnms::GetFontFilePath(), true, true);
 		sfmlMainWindow.GetWindow()->setFramerateLimit(mnms::GetDisplayRefreshRate());
 
