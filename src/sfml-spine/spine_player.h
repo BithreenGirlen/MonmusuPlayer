@@ -74,7 +74,7 @@ protected:
 	enum Constants { kBaseWidth = 1280, kBaseHeight = 720 };
 
 	CTextureLoader m_textureLoader;
-	std::vector<std::unique_ptr<spine::Atlas>> m_atlases;
+	std::vector<std::shared_ptr<spine::Atlas>> m_atlases;
 	std::vector<std::shared_ptr<spine::SkeletonData>> m_skeletonData;
 	std::vector<std::shared_ptr<CSpineDrawable>> m_drawables;
 

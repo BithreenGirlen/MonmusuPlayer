@@ -23,12 +23,12 @@ bool CSpinePlayer::LoadSpineFromFile(const std::vector<std::string>& atlasPaths,
 		const std::string& strAtlasPath = atlasPaths[i];
 		const std::string& strSkeletonPath = skelPaths[i];
 
-		std::unique_ptr<spine::Atlas> atlas = std::make_unique<spine::Atlas>(strAtlasPath.c_str(), &m_textureLoader);
+		std::shared_ptr<spine::Atlas> atlas = spine_loader::CreateAtlasFromFile(strAtlasPath.c_str(), &m_textureLoader);
 		if (atlas.get() == nullptr)continue;
 
 		std::shared_ptr<spine::SkeletonData> skeletonData = isBinarySkel ?
-			spine_loader::ReadBinarySkeletonFromFile(strSkeletonPath.c_str(), atlas.get(), 1.f) :
-			spine_loader::ReadTextSkeletonFromFile(strSkeletonPath.c_str(), atlas.get(), 1.f);
+			spine_loader::ReadBinarySkeletonFromFile(strSkeletonPath.c_str(), atlas.get()) :
+			spine_loader::ReadTextSkeletonFromFile(strSkeletonPath.c_str(), atlas.get());
 		if (skeletonData.get() == nullptr)return false;
 
 		m_atlases.push_back(std::move(atlas));
@@ -51,12 +51,12 @@ bool CSpinePlayer::LoadSpineFromMemory(const std::vector<std::string>& atlasData
 		const std::string& strAtlasPath = atlasPaths[i];
 		const std::string& strSkeletonData = skelData[i];
 
-		std::unique_ptr<spine::Atlas> atlas = std::make_unique<spine::Atlas>(strAtlasDatum.c_str(), static_cast<int>(strAtlasDatum.size()), strAtlasPath.c_str(), &m_textureLoader);
+		std::shared_ptr<spine::Atlas> atlas = spine_loader::CreateAtlasFromMemory(strAtlasDatum.c_str(), static_cast<int>(strAtlasDatum.size()), strAtlasPath.c_str(), &m_textureLoader);
 		if (atlas.get() == nullptr)continue;
 
 		std::shared_ptr<spine::SkeletonData> skeletonData = isBinarySkel ?
-			spine_loader::ReadBinarySkeletonFromMemory(reinterpret_cast<const unsigned char*>(strSkeletonData.data()), static_cast<int>(strSkeletonData.size()), atlas.get(), 1.f) :
-			spine_loader::ReadTextSkeletonFromMemory(strSkeletonData.data(), atlas.get(), 1.f);
+			spine_loader::ReadBinarySkeletonFromMemory(reinterpret_cast<const unsigned char*>(strSkeletonData.data()), static_cast<int>(strSkeletonData.size()), atlas.get()) :
+			spine_loader::ReadTextSkeletonFromMemory(strSkeletonData.data(), atlas.get());
 		if (skeletonData.get() == nullptr)return false;
 
 		m_atlases.push_back(std::move(atlas));
