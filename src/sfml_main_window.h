@@ -38,6 +38,11 @@ private:
 		bool toBeMoved = false;
 	};
 
+	struct WindowStyle
+	{
+		bool toFitToMonitorHeight = true;
+	};
+
 	struct SceneState
 	{
 		bool isTextHidden = false;
@@ -56,6 +61,7 @@ private:
 
 	MouseState m_mouseState;
 	WindowState m_windowState;
+	WindowStyle m_windowStyle;
 	SceneState m_sceneState;
 
 	std::unique_ptr<CSfmlSpinePlayer> m_sfmlSpinePlayer;

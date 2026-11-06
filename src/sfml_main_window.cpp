@@ -158,6 +158,14 @@ int CSfmlMainWindow::display()
 				case sf::Keyboard::Scancode::C:
 					toggleTextColor();
 					break;
+				case sf::Keyboard::Scancode::F:
+					if (!m_windowState.toBeMoved)
+					{
+						m_windowStyle.toFitToMonitorHeight ^= true;
+						alignWindowToTheTopLeftOfMonitor();
+						resetSpinePlayerScale();
+					}
+					break;
 				case sf::Keyboard::Scancode::H:
 					m_sceneState.isHelpHidden ^= true;
 					break;
@@ -274,11 +282,11 @@ CSfmlMainWindow::MonitorInfo CSfmlMainWindow::getMonitorInfo()
 		::GetMonitorInfoW(hMonitor, &monitorInfo);
 	}
 
-	const int x = static_cast<int>(monitorInfo.rcMonitor.left);
-	const int y = static_cast<int>(monitorInfo.rcMonitor.top);
+	const int x = static_cast<int>(monitorInfo.rcWork.left);
+	const int y = static_cast<int>(monitorInfo.rcWork.top);
 
-	const unsigned int width = static_cast<unsigned int>(monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left);
-	const unsigned int height = static_cast<unsigned int>(monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top);
+	const unsigned int width = static_cast<unsigned int>(monitorInfo.rcWork.right - monitorInfo.rcWork.left);
+	const unsigned int height = static_cast<unsigned int>(monitorInfo.rcWork.bottom - monitorInfo.rcWork.top);
 
 	return { {x, y}, {width, height} };
 #else
@@ -309,8 +317,15 @@ void CSfmlMainWindow::setSpinePlayerSize()
 			const sf::FloatRect bgBoundingBox = m_sfmlSpinePlayer->getCurrentBoundingBoxOfSlot(slotName.data(), slotName.length());
 			if (bgBoundingBox.size.x != 0.f)
 			{
-				const float fRatio = wholeSize.x / bgBoundingBox.size.x;
-				if (::isgreater(fRatio, 0.8f) && ::isless(fRatio, 1.2f))
+				static constexpr float kMinRatio = 0.8f;
+				static constexpr float kMaxWidthRatio = 1.35f;
+				static constexpr float kMaxHeightRatio = 1.5f;
+
+				const float fWidthRatio = wholeSize.x / bgBoundingBox.size.x;
+				const float fHeightRatio = wholeSize.y / bgBoundingBox.size.y;
+
+				if (::isgreater(fWidthRatio, kMinRatio) && ::isless(fWidthRatio, kMaxWidthRatio)
+					&& ::isgreater(fHeightRatio, kMinRatio) && ::isless(fHeightRatio, kMaxHeightRatio))
 				{
 					m_sfmlSpinePlayer->setBaseSize(bgBoundingBox.size.x, bgBoundingBox.size.y);
 					m_sfmlSpinePlayer->update(0.f);
@@ -321,6 +336,8 @@ void CSfmlMainWindow::setSpinePlayerSize()
 					offsetToBe.y += updatedBgBoundingBox.position.y;
 					m_sfmlSpinePlayer->setOffset(offsetToBe.x, offsetToBe.y);
 					m_sfmlSpinePlayer->setBaseSize(bgBoundingBox.size.x, bgBoundingBox.size.y);
+
+					break;
 				}
 			}
 		}
@@ -329,11 +346,22 @@ void CSfmlMainWindow::setSpinePlayerSize()
 
 void CSfmlMainWindow::resetSpinePlayerScale()
 {
+	static constexpr const float kDefaultZoom = 0.05f;
+
 	m_sfmlSpinePlayer->resetScale();
-	m_sfmlSpinePlayer->setSkeletonScale(m_sfmlSpinePlayer->getSkeletonScale() + 0.05f);
+
+	const sf::Vector2f fBaseSize = m_sfmlSpinePlayer->getBaseSize();
+	const float skeletonScale = m_sfmlSpinePlayer->getSkeletonScale();
+
+	const sf::Vector2u monitorSize = getMonitorInfo().size;
+	const bool isLandscape = monitorSize.x > monitorSize.y;
+	const bool toFitToWidth = isLandscape ^ m_windowStyle.toFitToMonitorHeight;
+	const float scale = (toFitToWidth ? monitorSize.x : monitorSize.y) / (toFitToWidth ? fBaseSize.x : fBaseSize.y);
+
+	m_sfmlSpinePlayer->setSkeletonScale(scale + kDefaultZoom);
+	m_sfmlSpinePlayer->setCanvasScale(scale);
 
 	resizeWindow();
-
 }
 
 bool CSfmlMainWindow::saveCurrentFrameToFile()
@@ -385,6 +413,7 @@ bool CSfmlMainWindow::setFont(const std::string& fontFilePath, bool bold, bool i
 
 	static constexpr char32_t help[] =
 		U"[C] Toggle text colour\n"
+		U"[F] Fit window to the monitor width/height\n"
 		U"[H] Hide help\n"
 		U"[T] Hide scene text\n"
 		U"[Scroll] Scale up/down; with Ctrl to zoom in/out\n"
