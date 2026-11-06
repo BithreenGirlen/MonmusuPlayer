@@ -6,22 +6,21 @@
 #include "sfml-spine/sfml_spine_player.h"
 
 #include "adv.h"
-/*Windows OS*/
+/* SFML does not support AAC decoding, so rely on OS-specific feature. */
 #include "mf_media_player.h"
 
 class CSfmlMainWindow
 {
 public:
-	CSfmlMainWindow(const wchar_t* swzWindowName = nullptr);
-	~CSfmlMainWindow();
+	CSfmlMainWindow(const char32_t* windowName = nullptr);
+	~CSfmlMainWindow() = default;
 
-	bool SetSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool isBinarySkel);
-	void SetSlotsToExclude(const std::vector<std::string>& slotNames);
-	void SetSlotExclusionCallback(bool (*pFunc)(const char*, size_t));
+	bool setSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool isBinarySkel);
+	void setSlotExclusionCallback(bool (*pFunc)(const char*, size_t)) noexcept;
 
-	int Display();
+	int display();
 
-	sf::RenderWindow* GetWindow() const { return m_window.get(); }
+	sf::RenderWindow* getWindow() const noexcept { return m_window.get(); }
 private:
 	static constexpr float kScaleDelta = 0.025f;
 
@@ -31,13 +30,13 @@ private:
 	sf::Clock m_spineClock;
 	sf::RenderTexture m_spineRenderTexture;
 
-	void ResizeWindow();
+	void resizeWindow();
 
-	bool SaveCurrentFrameToFile();
+	bool saveCurrentFrameToFile();
 	/*文章表示用*/
 public:
-	bool SetFont(const std::string& strFilePath, bool bBold, bool bItalic);
-	void SetScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
+	bool setFont(const std::string& strFilePath, bool bBold, bool bItalic);
+	void setScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
 private:
 	sf::Font m_font;
 	std::unique_ptr<sf::Text> m_msgText;
@@ -51,16 +50,16 @@ private:
 	std::vector<std::string> m_animationNames;
 	size_t m_nLastAnimationIndex = 0;
 
-	void ToggleTextColor();
-	void ToggleTextVisibility();
-	void ToggleImageSync();
+	void toggleTextColor();
+	void toggleTextVisibility();
+	void toggleImageSync();
 
-	void CheckTimer();
-	void ShiftMessageText(bool bForward);
-	void UpdateMessageText();
+	void checkTimer();
+	void shiftMessageText(bool bForward);
+	void updateMessageText();
 
-	void ShiftAnimation();
-	void CheckAnimationTrack();
+	void shiftAnimation();
+	void checkAnimationTrack();
 
 	std::unique_ptr<CMfMediaPlayer> m_pAudioPlayer;
 };

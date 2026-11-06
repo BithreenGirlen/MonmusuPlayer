@@ -43,51 +43,51 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	ComInit comInit;
 
 	if (!mnms::InitialiseSetting())return 0;
-	CSfmlMainWindow sfmlMainWindow(L"Monmusu Player");
+	CSfmlMainWindow sfmlMainWindow(U"Monmusu Player");
 
-	std::wstring wstrPickedFolder = win_dialogue::SelectFolder(L"Select advscene/resources/advscene/texture/character/r18_scenes/r18_XXXXX_Y folder", sfmlMainWindow.GetWindow()->getNativeHandle());
-	if (!wstrPickedFolder.empty())
+	std::wstring selectedFolderPath = win_dialogue::SelectFolder(L"Select advscene/resources/advscene/texture/character/r18_scenes/r18_XXXXX_Y folder", sfmlMainWindow.getWindow()->getNativeHandle());
+	if (!selectedFolderPath.empty())
 	{
-		sfmlMainWindow.SetFont(mnms::GetFontFilePath(), true, true);
-		sfmlMainWindow.GetWindow()->setFramerateLimit(mnms::GetDisplayRefreshRate());
+		sfmlMainWindow.setFont(mnms::GetFontFilePath(), true, true);
+		sfmlMainWindow.getWindow()->setFramerateLimit(mnms::GetDisplayRefreshRate());
 
-		std::vector<std::wstring> folders;
-		size_t nFolderIndex = 0;
-		win_filesystem::GetFilePathListAndIndex(wstrPickedFolder, {}, folders, nFolderIndex);
+		std::vector<std::wstring> sceneSpineFolderPaths;
+		size_t nFolderPathIndex = 0;
+		win_filesystem::GetFilePathListAndIndex(selectedFolderPath, {}, sceneSpineFolderPaths, nFolderPathIndex);
 		for (;;)
 		{
-			const std::wstring& wstrFolderPath = folders[nFolderIndex];
+			const std::wstring& sceneSpineFolderPath = sceneSpineFolderPaths[nFolderPathIndex];
 
-			std::vector<std::string> atlasPaths;
-			std::vector<std::string> skelPaths;
-			mnms::GetSpineList(wstrFolderPath, atlasPaths, skelPaths);
-			if (skelPaths.empty())break;
+			std::vector<std::string> atlasFilePaths;
+			std::vector<std::string> skelFilePaths;
+			mnms::GetSpineList(sceneSpineFolderPath, atlasFilePaths, skelFilePaths);
+			if (skelFilePaths.empty())break;
 
-			std::wstring wstrBookPath;
-			mnms::DeriveScenarioFilePathFromSpineFolderPath(wstrFolderPath, wstrBookPath);
+			std::wstring scenarioFilePath;
+			mnms::DeriveScenarioFilePathFromSpineFolderPath(sceneSpineFolderPath, scenarioFilePath);
 			std::vector<adv::TextDatum> textData;
 			std::vector<std::string> animationNames;
-			if (!wstrBookPath.empty())
+			if (!scenarioFilePath.empty())
 			{
-				mnms::ReadScenarioFile(wstrBookPath, textData, animationNames);
+				mnms::ReadScenarioFile(scenarioFilePath, textData, animationNames);
 			}
 
-			bool bRet = sfmlMainWindow.SetSpineFromFile(atlasPaths, skelPaths, mnms::IsSkelBinary());
+			bool bRet = sfmlMainWindow.setSpineFromFile(atlasFilePaths, skelFilePaths, mnms::IsSkelBinary());
 			if (!bRet)break;
 
-			sfmlMainWindow.SetScenarioData(textData, animationNames);
-			sfmlMainWindow.SetSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
+			sfmlMainWindow.setScenarioData(textData, animationNames);
+			sfmlMainWindow.setSlotExclusionCallback(&mnms::IsSlotToBeLeftOut);
 
-			int iRet = sfmlMainWindow.Display();
+			int iRet = sfmlMainWindow.display();
 			if (iRet == 1)
 			{
-				++nFolderIndex;
-				if (nFolderIndex >= folders.size())nFolderIndex = 0;
+				++nFolderPathIndex;
+				if (nFolderPathIndex >= sceneSpineFolderPaths.size())nFolderPathIndex = 0;
 			}
 			else if (iRet == 2)
 			{
-				--nFolderIndex;
-				if (nFolderIndex >= folders.size())nFolderIndex = folders.size() - 1;
+				--nFolderPathIndex;
+				if (nFolderPathIndex >= sceneSpineFolderPaths.size())nFolderPathIndex = sceneSpineFolderPaths.size() - 1;
 			}
 			else
 			{

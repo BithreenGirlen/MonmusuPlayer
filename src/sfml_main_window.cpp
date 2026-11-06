@@ -2,40 +2,31 @@
 
 #include "sfml_main_window.h"
 
-CSfmlMainWindow::CSfmlMainWindow(const wchar_t* swzWindowName)
+CSfmlMainWindow::CSfmlMainWindow(const char32_t* windowName)
 {
-	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ 200, 200 }), swzWindowName, sf::Style::None);
+	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ 200, 200 }), windowName, sf::Style::None);
 
 	m_window->setPosition(sf::Vector2i(0, 0));
 
 	m_sfmlSpinePlayer = std::make_unique<CSfmlSpinePlayer>();
 }
 
-CSfmlMainWindow::~CSfmlMainWindow()
-{
-
-}
-
-bool CSfmlMainWindow::SetSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool isBinarySkel)
+bool CSfmlMainWindow::setSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool isBinarySkel)
 {
 	return m_sfmlSpinePlayer->loadSpineFromFile(atlasPaths, skelPaths, isBinarySkel);
 }
 
-void CSfmlMainWindow::SetSlotsToExclude(const std::vector<std::string>& slotNames)
-{
-	m_sfmlSpinePlayer->setSlotsToExclude(slotNames);
-}
-void CSfmlMainWindow::SetSlotExclusionCallback(bool (*pFunc)(const char*, size_t))
+void CSfmlMainWindow::setSlotExclusionCallback(bool (*pFunc)(const char*, size_t)) noexcept
 {
 	m_sfmlSpinePlayer->setSlotExcludeCallback(pFunc);
 }
 
-int CSfmlMainWindow::Display()
+int CSfmlMainWindow::display()
 {
 	m_sfmlSpinePlayer->resetScale();
-	ResizeWindow();
+	resizeWindow();
 
-	UpdateMessageText();
+	updateMessageText();
 
 	sf::Vector2i iMouseStartPos;
 
@@ -85,7 +76,7 @@ int CSfmlMainWindow::Display()
 
 					if (iX == 0 && iY == 0)
 					{
-						ShiftAnimation();
+						shiftAnimation();
 					}
 
 					bLeftDowned = false;
@@ -93,7 +84,7 @@ int CSfmlMainWindow::Display()
 				else if (event.button == sf::Mouse::Button::Middle)
 				{
 					m_sfmlSpinePlayer->resetScale();
-					ResizeWindow();
+					resizeWindow();
 				}
 			},
 			[&](const sf::Event::MouseMoved& event)
@@ -127,7 +118,7 @@ int CSfmlMainWindow::Display()
 				}
 				else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 				{
-					ShiftMessageText(event.delta < 0);
+					shiftMessageText(event.delta < 0);
 				}
 				else
 				{
@@ -144,7 +135,7 @@ int CSfmlMainWindow::Display()
 						canvasScale = (std::max)(kMinScale, canvasScale);
 						m_sfmlSpinePlayer->setCanvasScale(canvasScale);
 
-						ResizeWindow();
+						resizeWindow();
 					}
 				}
 			},
@@ -153,12 +144,12 @@ int CSfmlMainWindow::Display()
 				switch (event.scancode)
 				{
 				case sf::Keyboard::Scancode::Left:
-					ShiftMessageText(false);
+					shiftMessageText(false);
 					break;
 				case sf::Keyboard::Scancode::Right:
 					if (m_nTextIndex < m_textData.size() - 1)
 					{
-						ShiftMessageText(true);
+						shiftMessageText(true);
 					}
 					break;
 				default:
@@ -170,16 +161,16 @@ int CSfmlMainWindow::Display()
 				switch (event.scancode)
 				{
 				case sf::Keyboard::Scancode::C:
-					ToggleTextColor();
+					toggleTextColor();
 					break;
 				case sf::Keyboard::Scancode::S:
-					SaveCurrentFrameToFile();
+					saveCurrentFrameToFile();
 					break;
 				case sf::Keyboard::Scancode::T:
-					ToggleTextVisibility();
+					toggleTextVisibility();
 					break;
 				case sf::Keyboard::Scancode::Q:
-					ToggleImageSync();
+					toggleImageSync();
 					break;
 				case sf::Keyboard::Scancode::Escape:
 					m_window->close();
@@ -221,7 +212,7 @@ int CSfmlMainWindow::Display()
 
 		m_window->display();
 
-		CheckTimer();
+		checkTimer();
 
 		if (bOnWindowMove)
 		{
@@ -234,7 +225,7 @@ int CSfmlMainWindow::Display()
 	return iRet;
 }
 
-void CSfmlMainWindow::ResizeWindow()
+void CSfmlMainWindow::resizeWindow()
 {
 	if (m_sfmlSpinePlayer.get() != nullptr)
 	{
@@ -253,7 +244,7 @@ void CSfmlMainWindow::ResizeWindow()
 	}
 }
 
-bool CSfmlMainWindow::SaveCurrentFrameToFile()
+bool CSfmlMainWindow::saveCurrentFrameToFile()
 {
 	/*SFML does not have API equivalent to SDL's SDL_GetBasePath().*/
 	float fTrackTime = 0.f;
@@ -272,7 +263,7 @@ bool CSfmlMainWindow::SaveCurrentFrameToFile()
 	return image.saveToFile(strFilePath);
 }
 /*字体設定*/
-bool CSfmlMainWindow::SetFont(const std::string& strFilePath, bool bBold, bool bItalic)
+bool CSfmlMainWindow::setFont(const std::string& strFilePath, bool bBold, bool bItalic)
 {
 	bool bRet = m_font.openFromFile(strFilePath);
 	if (!bRet)return false;
@@ -287,7 +278,7 @@ bool CSfmlMainWindow::SetFont(const std::string& strFilePath, bool bBold, bool b
 	return true;
 }
 
-void CSfmlMainWindow::SetScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames)
+void CSfmlMainWindow::setScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames)
 {
 	m_textData = std::move(textData);
 	m_animationNames = std::move(animationNames);
@@ -313,27 +304,27 @@ void CSfmlMainWindow::SetScenarioData(std::vector<adv::TextDatum>& textData, std
 	}
 }
 /*文字色切り替え*/
-void CSfmlMainWindow::ToggleTextColor()
+void CSfmlMainWindow::toggleTextColor()
 {
 	m_msgText->setFillColor(m_msgText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
 	m_msgText->setOutlineColor(m_msgText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
 }
 
-void CSfmlMainWindow::ToggleTextVisibility()
+void CSfmlMainWindow::toggleTextVisibility()
 {
 	m_bTextHidden ^= true;
 }
 
-void CSfmlMainWindow::ToggleImageSync()
+void CSfmlMainWindow::toggleImageSync()
 {
 	m_bImageSynced ^= true;
 	if (m_bImageSynced)
 	{
-		CheckAnimationTrack();
+		checkAnimationTrack();
 	}
 }
 /*文章切り替え是否確認*/
-void CSfmlMainWindow::CheckTimer()
+void CSfmlMainWindow::checkTimer()
 {
 	constexpr float fAutoPlayInterval = 2.f;
 	float fSecond = m_textClock.getElapsedTime().asSeconds();
@@ -341,7 +332,7 @@ void CSfmlMainWindow::CheckTimer()
 	{
 		if (m_nTextIndex < m_textData.size() - 1)
 		{
-			ShiftMessageText(true);
+			shiftMessageText(true);
 		}
 		else
 		{
@@ -350,7 +341,7 @@ void CSfmlMainWindow::CheckTimer()
 	}
 }
 /*表示文章移行*/
-void CSfmlMainWindow::ShiftMessageText(bool bForward)
+void CSfmlMainWindow::shiftMessageText(bool bForward)
 {
 	if (bForward)
 	{
@@ -362,10 +353,10 @@ void CSfmlMainWindow::ShiftMessageText(bool bForward)
 		--m_nTextIndex;
 		if (m_nTextIndex >= m_textData.size())m_nTextIndex = m_textData.size() - 1;
 	}
-	UpdateMessageText();
+	updateMessageText();
 }
 /*表示文章変更適用*/
-void CSfmlMainWindow::UpdateMessageText()
+void CSfmlMainWindow::updateMessageText()
 {
 	if (m_nTextIndex >= m_textData.size())return;
 
@@ -379,7 +370,7 @@ void CSfmlMainWindow::UpdateMessageText()
 	/* Checks if animation has to be switched or not. */
 	if (m_bImageSynced)
 	{
-		CheckAnimationTrack();
+		checkAnimationTrack();
 	}
 
 	if (!textDatum.wstrVoicePath.empty())
@@ -391,7 +382,7 @@ void CSfmlMainWindow::UpdateMessageText()
 	}
 	m_textClock.restart();
 }
-void CSfmlMainWindow::ShiftAnimation()
+void CSfmlMainWindow::shiftAnimation()
 {
 	if (m_animationNames.empty())
 	{
@@ -408,7 +399,7 @@ void CSfmlMainWindow::ShiftAnimation()
 	}
 }
 
-void CSfmlMainWindow::CheckAnimationTrack()
+void CSfmlMainWindow::checkAnimationTrack()
 {
 	if (m_nTextIndex >= m_textData.size())return;
 

@@ -198,7 +198,7 @@ const std::string& mnms::GetFontFilePath()
 	return g_playerSetting.strFontFilePath;
 }
 
-const bool mnms::IsSkelBinary()
+bool mnms::IsSkelBinary()
 {
 	constexpr const std::wstring_view binarySkelCandidates[] =
 	{
@@ -216,17 +216,17 @@ const bool mnms::IsSkelBinary()
 	return false;
 }
 /*描画素材一覧取得*/
-void mnms::GetSpineList(const std::wstring& folderPath, std::vector<std::string>& atlasPaths, std::vector<std::string>& skelPaths)
+void mnms::GetSpineList(const std::wstring& sceneSpineFolderPath, std::vector<std::string>& atlasFilePaths, std::vector<std::string>& skelFilePaths)
 {
 	const bool isAtlasLonger = g_playerSetting.wstrAtlasExtension.size() > g_playerSetting.wstrSkelExtension.size();
 
 	const std::wstring& longerExtesion = isAtlasLonger ? g_playerSetting.wstrAtlasExtension : g_playerSetting.wstrSkelExtension;
 	const std::wstring& shorterExtension = isAtlasLonger ? g_playerSetting.wstrSkelExtension : g_playerSetting.wstrAtlasExtension;
-	std::vector<std::string>& longerPaths = isAtlasLonger ? atlasPaths : skelPaths;
-	std::vector<std::string>& shorterPaths = isAtlasLonger ? skelPaths : atlasPaths;
+	std::vector<std::string>& longerPaths = isAtlasLonger ? atlasFilePaths : skelFilePaths;
+	std::vector<std::string>& shorterPaths = isAtlasLonger ? skelFilePaths : atlasFilePaths;
 
 	std::vector<std::wstring> filePaths;
-	win_filesystem::CreateFilePathList(folderPath, L"*", filePaths);
+	win_filesystem::CreateFilePathList(sceneSpineFolderPath, L"*", filePaths);
 
 	for (const auto& filePath : filePaths)
 	{
@@ -421,9 +421,9 @@ bool mnms::IsSlotToBeLeftOut(const char* szSlotName, size_t nSlotNameLength)
 		const char* pNameEnd = szSlotName + nSlotNameLength;
 		for (const auto& slotNameToExclude : s_slotNamesToExclude)
 		{
-
 			const char* pFilterStart = slotNameToExclude.data();
 			const char* pFilterEnd = slotNameToExclude.data() + slotNameToExclude.size();
+
 			isToBeLeftOut |= std::search(szSlotName, pNameEnd, pFilterStart, pFilterEnd) != pNameEnd;
 		}
 	}

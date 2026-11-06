@@ -10,9 +10,9 @@ namespace mnms
 {
 	bool InitialiseSetting();
 	const std::string& GetFontFilePath();
-	const bool IsSkelBinary();
+	bool IsSkelBinary();
 
-	void GetSpineList(const std::wstring& folderPath, std::vector<std::string>& atlasPaths, std::vector<std::string>& skelPaths);
+	void GetSpineList(const std::wstring& sceneSpineFolderPath, std::vector<std::string>& atlasFilePaths, std::vector<std::string>& skelFilePaths);
 	bool DeriveVoiceFolderPathFromSpineFolderPath(const std::wstring& sceneSpineFolderPath, std::wstring& sceneVoiceFolderPath);
 	bool DeriveScenarioFilePathFromSpineFolderPath(const std::wstring& sceneSpinesFolderPath, std::wstring& sceneScenarioFilePath);
 
