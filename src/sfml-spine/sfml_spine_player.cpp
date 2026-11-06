@@ -76,7 +76,7 @@ void CSfmlSpinePlayer::WorkOutDefaultOffset()
 
 	for (const auto& pDrawable : m_drawables)
 	{
-		const auto& rect = pDrawable->GetBoundingBox();
+		const auto& rect = pDrawable->getBoundingBox();
 		fMinX = (std::min)(fMinX, rect.position.x);
 		fMinY = (std::min)(fMinY, rect.position.y);
 	}

@@ -82,7 +82,7 @@ void CSpinePlayer::Update(float fDelta)
 {
 	for (const auto& drawable : m_drawables)
 	{
-		drawable->Update(fDelta * m_fTimeScale);
+		drawable->update(fDelta * m_fTimeScale);
 	}
 }
 /*拡縮変更*/
@@ -165,11 +165,11 @@ void CSpinePlayer::ShiftSkin()
 
 	for (const auto& pDrawable : m_drawables)
 	{
-		spine::Skin* skin = pDrawable->skeleton->getData()->findSkin(szSkinName);
+		spine::Skin* skin = pDrawable->skeleton()->getData()->findSkin(szSkinName);
 		if (skin != nullptr)
 		{
-			pDrawable->skeleton->setSkin(skin);
-			pDrawable->skeleton->setSlotsToSetupPose();
+			pDrawable->skeleton()->setSkin(skin);
+			pDrawable->skeleton()->setSlotsToSetupPose();
 		}
 	}
 }
@@ -203,10 +203,10 @@ void CSpinePlayer::RestartAnimation()
 
 	for (const auto& pDrawable : m_drawables)
 	{
-		spine::Animation* pAnimation = pDrawable->skeleton->getData()->findAnimation(szAnimationName);
+		spine::Animation* pAnimation = pDrawable->skeleton()->getData()->findAnimation(szAnimationName);
 		if (pAnimation != nullptr)
 		{
-			pDrawable->animationState->setAnimation(0, pAnimation->getName(), true);
+			pDrawable->animationState()->setAnimation(0, pAnimation->getName(), true);
 		}
 	}
 }
@@ -215,7 +215,7 @@ void CSpinePlayer::TogglePma()
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		pDrawable->isAlphaPremultiplied ^= true;
+		pDrawable->premultiplyAlpha(pDrawable->isAlphaPremultiplied());
 	}
 }
 /*槽溝指定合成方法採択可否*/
@@ -223,7 +223,7 @@ void CSpinePlayer::ToggleBlendModeAdoption()
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		pDrawable->isToForceBlendModeNormal ^= true;
+		pDrawable->forceBlendModeNormal(!pDrawable->isBlendModeNormalForced());
 	}
 }
 /*描画順切り替え*/
@@ -236,7 +236,7 @@ const char* CSpinePlayer::GetCurrentAnimationName()
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		auto& tracks = pDrawable->animationState->getTracks();
+		auto& tracks = pDrawable->animationState()->getTracks();
 		for (size_t i = 0; i < tracks.size(); ++i)
 		{
 			spine::Animation* pAnimation = tracks[i]->getAnimation();
@@ -254,7 +254,7 @@ void CSpinePlayer::GetCurrentAnimationTime(float* fTrack, float* fLast, float* f
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		auto& tracks = pDrawable->animationState->getTracks();
+		auto& tracks = pDrawable->animationState()->getTracks();
 		for (size_t i = 0; i < tracks.size(); ++i)
 		{
 			spine::Animation* pAnimation = tracks[i]->getAnimation();
@@ -308,7 +308,7 @@ void CSpinePlayer::SetSlotsToExclude(const std::vector<std::string>& slotNames)
 
 	for (const auto& pDrawable : m_drawables)
 	{
-		pDrawable->SetLeaveOutList(leaveOutList);
+		pDrawable->setLeaveOutList(leaveOutList);
 	}
 }
 /*装い合成*/
@@ -319,22 +319,22 @@ void CSpinePlayer::MixSkins(const std::vector<std::string>& skinNames)
 
 	for (const auto& pDrawble : m_drawables)
 	{
-		spine::Skin* skinToSet = pDrawble->skeleton->getData()->findSkin(currentSkinName.c_str());
+		spine::Skin* skinToSet = pDrawble->skeleton()->getData()->findSkin(currentSkinName.c_str());
 		if (skinToSet == nullptr)continue;
 
 		for (const auto& skinName : skinNames)
 		{
 			if (currentSkinName != skinName)
 			{
-				spine::Skin* skinToAdd = pDrawble->skeleton->getData()->findSkin(skinName.c_str());
+				spine::Skin* skinToAdd = pDrawble->skeleton()->getData()->findSkin(skinName.c_str());
 				if (skinToAdd != nullptr)
 				{
 					skinToSet->addSkin(skinToAdd);
 				}
 			}
 		}
-		pDrawble->skeleton->setSkin(skinToSet);
-		pDrawble->skeleton->setSlotsToSetupPose();
+		pDrawble->skeleton()->setSkin(skinToSet);
+		pDrawble->skeleton()->setSlotsToSetupPose();
 	}
 }
 /*動作合成*/
@@ -347,17 +347,17 @@ void CSpinePlayer::MixAnimations(const std::vector<std::string>& animationNames)
 
 	for (const auto& pDrawable : m_drawables)
 	{
-		if (pDrawable->skeleton->getData()->findAnimation(currentAnimationName.c_str()) == nullptr)continue;
+		if (pDrawable->skeleton()->getData()->findAnimation(currentAnimationName.c_str()) == nullptr)continue;
 
 		int iTrack = 1;
 		for (const auto& animationName : animationNames)
 		{
 			if (animationName != currentAnimationName)
 			{
-				spine::Animation* animation = pDrawable->skeleton->getData()->findAnimation(animationName.c_str());
+				spine::Animation* animation = pDrawable->skeleton()->getData()->findAnimation(animationName.c_str());
 				if (animation != nullptr)
 				{
-					pDrawable->animationState->addAnimation(iTrack, animation, false, 0.f);
+					pDrawable->animationState()->addAnimation(iTrack, animation, false, 0.f);
 					++iTrack;
 				}
 			}
@@ -369,7 +369,7 @@ void CSpinePlayer::SetSlotExclusionCallback(bool(*pFunc)(const char*, size_t))
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		pDrawable->SetLeaveOutCallback(pFunc);
+		pDrawable->setLeaveOutCallback(pFunc);
 	}
 }
 /*寸法受け渡し*/
@@ -411,8 +411,8 @@ bool CSpinePlayer::SetupDrawer()
 		auto pDrawable = std::make_shared<CSpineDrawable>(pSkeletonDatum.get());
 		if (pDrawable.get() == nullptr)continue;
 
-		pDrawable->skeleton->setPosition(m_fBaseSize.x / 2, m_fBaseSize.y / 2);
-		pDrawable->Update(0.f);
+		pDrawable->skeleton()->setPosition(m_fBaseSize.x / 2, m_fBaseSize.y / 2);
+		pDrawable->update(0.f);
 
 		m_drawables.push_back(std::move(pDrawable));
 
@@ -518,7 +518,7 @@ void CSpinePlayer::UpdatePosition()
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		pDrawable->skeleton->setPosition(m_fBaseSize.x / 2 - m_fOffset.x, m_fBaseSize.y / 2 - m_fOffset.y);
+		pDrawable->skeleton()->setPosition(m_fBaseSize.x / 2 - m_fOffset.x, m_fBaseSize.y / 2 - m_fOffset.y);
 	}
 }
 /*合成動作消去*/
@@ -526,10 +526,10 @@ void CSpinePlayer::ClearAnimationTracks()
 {
 	for (const auto& pDrawable : m_drawables)
 	{
-		const auto& trackEntry = pDrawable->animationState->getTracks();
+		const auto& trackEntry = pDrawable->animationState()->getTracks();
 		for (size_t iTrack = 1; iTrack < trackEntry.size(); ++iTrack)
 		{
-			pDrawable->animationState->setEmptyAnimation(iTrack, 0.f);
+			pDrawable->animationState()->setEmptyAnimation(iTrack, 0.f);
 		}
 	}
 }

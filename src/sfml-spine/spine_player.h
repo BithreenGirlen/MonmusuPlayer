@@ -10,7 +10,7 @@
 
 #include "sfml_spine.h"
 using FPoint2 = sf::Vector2f;
-using CSpineDrawable = CSfmlSpineDrawer;
+using CSpineDrawable = CSfmlSpineDrawable;
 using CTextureLoader = CSfmlTextureLoader;
 
 class CSpinePlayer
