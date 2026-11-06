@@ -264,11 +264,25 @@ bool CSfmlMainWindow::setFont(const std::string& fontFilePath, bool bold, bool i
 	bool bRet = m_font.openFromFile(fontFilePath);
 	if (!bRet)return false;
 
-	constexpr float fOutLineThickness = 2.4f;
+	static constexpr float kOutLineThickness = 2.4f;
+
+	/* SFML does not provide the way to retrieve DPI. */
+	static const auto GetDpiScale = [](const sf::Window* const pWindow)
+		-> float
+		{
+#if defined (_WIN32)
+			return ::GetDpiForWindow(pWindow->getNativeHandle()) / 96.f;
+#else
+			return 1.f
+#endif
+		};
+	const float dpiScale = GetDpiScale(m_window.get());
+
 	m_msgText = std::make_unique<sf::Text>(m_font);
 	m_msgText->setFillColor(sf::Color::Black);
 	m_msgText->setStyle((bold ? sf::Text::Style::Bold : 0) | (italic ? sf::Text::Style::Italic : 0));
-	m_msgText->setOutlineThickness(fOutLineThickness);
+	m_msgText->setCharacterSize(static_cast<unsigned int>(m_msgText->getCharacterSize() * dpiScale));
+	m_msgText->setOutlineThickness(kOutLineThickness * dpiScale);
 	m_msgText->setOutlineColor(sf::Color::White);
 
 	return true;
@@ -280,7 +294,7 @@ void CSfmlMainWindow::setScenarioData(std::vector<adv::TextDatum>& textData, std
 	m_animationNames = std::move(animationNames);
 
 	m_nTextIndex = 0;
-	m_msgText->setString("");
+	m_msgText->setString(U"");
 	m_nLastAnimationIndex = 0;
 
 	const auto HasAudio = [](const adv::TextDatum& text)
