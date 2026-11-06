@@ -42,6 +42,8 @@ private:
 	{
 		bool isTextHidden = false;
 		bool isImageSynced = true;
+
+		bool isHelpHidden = false;
 	};
 
 	struct MonitorInfo
@@ -74,8 +76,9 @@ public:
 	void setScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
 private:
 	sf::Font m_font;
-	std::unique_ptr<sf::Text> m_msgText;
-	sf::Clock m_textClock;
+	std::unique_ptr<sf::Text> m_sceneText;
+	sf::Clock m_sceneTextClock;
+	std::unique_ptr<sf::Text> m_helpText;
 
 	std::vector<adv::TextDatum> m_textData;
 	size_t m_nTextIndex = 0;

@@ -158,6 +158,9 @@ int CSfmlMainWindow::display()
 				case sf::Keyboard::Scancode::C:
 					toggleTextColor();
 					break;
+				case sf::Keyboard::Scancode::H:
+					m_sceneState.isHelpHidden ^= true;
+					break;
 				case sf::Keyboard::Scancode::S:
 					saveCurrentFrameToFile();
 					break;
@@ -200,9 +203,14 @@ int CSfmlMainWindow::display()
 			m_window->draw(spineSprite);
 		}
 
+		if (!m_sceneState.isHelpHidden)
+		{
+			m_window->draw(*m_helpText);
+		}
+
 		if (!m_sceneState.isTextHidden)
 		{
-			m_window->draw(*m_msgText);
+			m_window->draw(*m_sceneText);
 		}
 
 		m_window->display();
@@ -243,6 +251,11 @@ void CSfmlMainWindow::resizeWindow()
 
 		bool bRet = m_spineRenderTexture.resize({ windowWidth, windowHeight });
 	}
+
+	const sf::Vector2u windowSize = m_window->getSize();
+	const sf::FloatRect bounds = m_helpText->getGlobalBounds();
+	unsigned int helpBottom = (std::min)(monitorSize.y, windowSize.y);
+	m_helpText->setPosition(sf::Vector2f{ 0, helpBottom - bounds.size.y });
 }
 
 void CSfmlMainWindow::alignWindowToTheTopLeftOfMonitor()
@@ -359,12 +372,29 @@ bool CSfmlMainWindow::setFont(const std::string& fontFilePath, bool bold, bool i
 		};
 	const float dpiScale = GetDpiScale(m_window.get());
 
-	m_msgText = std::make_unique<sf::Text>(m_font);
-	m_msgText->setFillColor(sf::Color::Black);
-	m_msgText->setStyle((bold ? sf::Text::Style::Bold : 0) | (italic ? sf::Text::Style::Italic : 0));
-	m_msgText->setCharacterSize(static_cast<unsigned int>(m_msgText->getCharacterSize() * dpiScale));
-	m_msgText->setOutlineThickness(kOutLineThickness * dpiScale);
-	m_msgText->setOutlineColor(sf::Color::White);
+	m_sceneText = std::make_unique<sf::Text>(m_font);
+	m_sceneText->setFillColor(sf::Color::Black);
+	m_sceneText->setStyle((bold ? sf::Text::Style::Bold : 0) | (italic ? sf::Text::Style::Italic : 0));
+	m_sceneText->setCharacterSize(static_cast<unsigned int>(m_sceneText->getCharacterSize() * dpiScale));
+	m_sceneText->setOutlineThickness(kOutLineThickness * dpiScale);
+	m_sceneText->setOutlineColor(sf::Color::White);
+
+	m_helpText = std::make_unique<sf::Text>(*m_sceneText);
+	m_helpText->setStyle(sf::Text::Regular);
+	m_helpText->setCharacterSize(m_sceneText->getCharacterSize() / 2);
+
+	static constexpr char32_t help[] =
+		U"[C] Toggle text colour\n"
+		U"[H] Hide help\n"
+		U"[T] Hide scene text\n"
+		U"[Scroll] Scale up/down; with Ctrl to zoom in/out\n"
+		U"[Left-pressed + scroll] Speed up/down the animation\n"
+		U"[Left-drag] Move view-point\n"
+		U"[Middle-click] Reset scale, speed, and view-point\n"
+		U"[Right-pressed + Left-click] Move window\n"
+		U"[←|→; Right-pressed + scroll] Fast forward/rewind the scene text\n"
+		U"[↑|↓] Open the next/prev. folder\n";
+	m_helpText->setString(help);
 
 	return true;
 }
@@ -375,7 +405,7 @@ void CSfmlMainWindow::setScenarioData(std::vector<adv::TextDatum>& textData, std
 	m_animationNames = std::move(animationNames);
 
 	m_nTextIndex = 0;
-	m_msgText->setString(U"");
+	m_sceneText->setString(U"");
 	m_nLastAnimationIndex = 0;
 
 	const auto HasAudio = [](const adv::TextDatum& text)
@@ -397,8 +427,11 @@ void CSfmlMainWindow::setScenarioData(std::vector<adv::TextDatum>& textData, std
 /*文字色切り替え*/
 void CSfmlMainWindow::toggleTextColor()
 {
-	m_msgText->setFillColor(m_msgText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
-	m_msgText->setOutlineColor(m_msgText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
+	m_sceneText->setFillColor(m_sceneText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
+	m_sceneText->setOutlineColor(m_sceneText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
+
+	m_helpText->setFillColor(m_helpText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
+	m_helpText->setOutlineColor(m_helpText->getFillColor() == sf::Color::Black ? sf::Color::White : sf::Color::Black);
 }
 
 void CSfmlMainWindow::toggleTextVisibility()
@@ -418,7 +451,7 @@ void CSfmlMainWindow::toggleImageSync()
 void CSfmlMainWindow::checkTimer()
 {
 	constexpr float fAutoPlayInterval = 2.f;
-	float fSecond = m_textClock.getElapsedTime().asSeconds();
+	float fSecond = m_sceneTextClock.getElapsedTime().asSeconds();
 	if (m_pAudioPlayer.get() != nullptr && m_pAudioPlayer.get()->isEnded() && fSecond > fAutoPlayInterval)
 	{
 		if (m_nTextIndex < m_textData.size() - 1)
@@ -427,7 +460,7 @@ void CSfmlMainWindow::checkTimer()
 		}
 		else
 		{
-			m_textClock.restart();
+			m_sceneTextClock.restart();
 		}
 	}
 }
@@ -470,7 +503,7 @@ void CSfmlMainWindow::updateMessageText()
 		{
 			nTextBufferLength += static_cast<size_t>(iWritten);
 			textBuffer[nTextBufferLength] = L'\0';
-			m_msgText->setString(textBuffer);
+			m_sceneText->setString(textBuffer);
 		}
 	}
 
@@ -487,7 +520,7 @@ void CSfmlMainWindow::updateMessageText()
 			m_pAudioPlayer->play(textDatum.wstrVoicePath.c_str());
 		}
 	}
-	m_textClock.restart();
+	m_sceneTextClock.restart();
 }
 void CSfmlMainWindow::shiftAnimation()
 {
