@@ -6,13 +6,17 @@
 class CSfmlSpinePlayer : public CSpinePlayer
 {
 public:
-	CSfmlSpinePlayer();
-	virtual ~CSfmlSpinePlayer();
+	CSfmlSpinePlayer() = default;
+	virtual ~CSfmlSpinePlayer() = default;
 
-	void Draw(sf::RenderTarget* renderTarget);
+	void redraw(sf::RenderTarget* pRenderTarget, sf::RenderStates& renderState);
+
+	sf::Transform calculateTransformMatrix(sf::RenderTarget* pRenderTarget) const noexcept;
+	sf::FloatRect getCurrentBoundingBox() const;
+	sf::FloatRect getCurrentBoundingBoxOfSlot(std::string_view slotName) const;
 private:
-	virtual void WorkOutDefaultScale();
-	virtual void WorkOutDefaultOffset();
+	void workOutDefaultScale() override;
+	bool workOutDefaultSizeAndOffset() override;
 };
 
 #endif // !SFML_SPINE_PLAYER_H_

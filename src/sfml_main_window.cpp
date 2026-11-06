@@ -18,21 +18,21 @@ CSfmlMainWindow::~CSfmlMainWindow()
 
 bool CSfmlMainWindow::SetSpineFromFile(const std::vector<std::string>& atlasPaths, const std::vector<std::string>& skelPaths, bool isBinarySkel)
 {
-	return m_sfmlSpinePlayer->LoadSpineFromFile(atlasPaths, skelPaths, isBinarySkel);
+	return m_sfmlSpinePlayer->loadSpineFromFile(atlasPaths, skelPaths, isBinarySkel);
 }
 
 void CSfmlMainWindow::SetSlotsToExclude(const std::vector<std::string>& slotNames)
 {
-	m_sfmlSpinePlayer->SetSlotsToExclude(slotNames);
+	m_sfmlSpinePlayer->setSlotsToExclude(slotNames);
 }
 void CSfmlMainWindow::SetSlotExclusionCallback(bool (*pFunc)(const char*, size_t))
 {
-	m_sfmlSpinePlayer->SetSlotExclusionCallback(pFunc);
+	m_sfmlSpinePlayer->setSlotExcludeCallback(pFunc);
 }
 
 int CSfmlMainWindow::Display()
 {
-	m_sfmlSpinePlayer->ResetScale();
+	m_sfmlSpinePlayer->resetScale();
 	ResizeWindow();
 
 	UpdateMessageText();
@@ -41,7 +41,7 @@ int CSfmlMainWindow::Display()
 
 	bool bOnWindowMove = false;
 	bool bLeftDowned = false;
-	bool bLeftCombinated = false;
+	bool bLeftCombined = false;
 
 	int iRet = 0;
 
@@ -67,9 +67,9 @@ int CSfmlMainWindow::Display()
 			{
 				if (event.button == sf::Mouse::Button::Left)
 				{
-					if (bLeftCombinated)
+					if (bLeftCombined)
 					{
-						bLeftCombinated = false;
+						bLeftCombined = false;
 						bLeftDowned = false;
 						return;
 					}
@@ -92,7 +92,7 @@ int CSfmlMainWindow::Display()
 				}
 				else if (event.button == sf::Mouse::Button::Middle)
 				{
-					m_sfmlSpinePlayer->ResetScale();
+					m_sfmlSpinePlayer->resetScale();
 					ResizeWindow();
 				}
 			},
@@ -104,11 +104,11 @@ int CSfmlMainWindow::Display()
 					{
 						int iX = iMouseStartPos.x - event.position.x;
 						int iY = iMouseStartPos.y - event.position.y;
-						m_sfmlSpinePlayer->MoveViewPoint(iX, iY);
+						m_sfmlSpinePlayer->addOffset(iX, iY);
 
 						iMouseStartPos = event.position;
 
-						bLeftCombinated = true;
+						bLeftCombined = true;
 					}
 				}
 			},
@@ -116,8 +116,14 @@ int CSfmlMainWindow::Display()
 			{
 				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 				{
-					m_sfmlSpinePlayer->RescaleTime(event.delta < 0);
-					bLeftCombinated = true;
+					static constexpr float kTimeScaleDelta = 0.05f;
+					const float scrollSign = event.delta < 0 ? 1.f : -1.f;
+
+					float timeScale = m_sfmlSpinePlayer->getTimeScale() + kTimeScaleDelta * scrollSign;
+					timeScale = (std::max)(timeScale, 0.f);
+					m_sfmlSpinePlayer->setTimeScale(timeScale);
+
+					bLeftCombined = true;
 				}
 				else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 				{
@@ -125,10 +131,19 @@ int CSfmlMainWindow::Display()
 				}
 				else
 				{
-					m_sfmlSpinePlayer->RescaleSkeleton(event.delta < 0);
+					static constexpr float kMinScale = 0.15f;
+					const float scrollSign = event.delta < 0 ? 1.f : -1.f;
+
+					float skeletonScale = m_sfmlSpinePlayer->getSkeletonScale() + kScaleDelta * scrollSign;
+					skeletonScale = (std::max)(kMinScale, skeletonScale);
+					m_sfmlSpinePlayer->setSkeletonScale(skeletonScale);
+
 					if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl))
 					{
-						m_sfmlSpinePlayer->RescaleCanvas(event.delta < 0);
+						float canvasScale = m_sfmlSpinePlayer->getCanvasScale() + kScaleDelta * scrollSign;
+						canvasScale = (std::max)(kMinScale, canvasScale);
+						m_sfmlSpinePlayer->setCanvasScale(canvasScale);
+
 						ResizeWindow();
 					}
 				}
@@ -154,14 +169,8 @@ int CSfmlMainWindow::Display()
 			{
 				switch (event.scancode)
 				{
-				case sf::Keyboard::Scancode::B:
-					m_sfmlSpinePlayer->ToggleBlendModeAdoption();
-					break;
 				case sf::Keyboard::Scancode::C:
 					ToggleTextColor();
-					break;
-				case sf::Keyboard::Scancode::R:
-					m_sfmlSpinePlayer->ToggleDrawOrder();
 					break;
 				case sf::Keyboard::Scancode::S:
 					SaveCurrentFrameToFile();
@@ -189,14 +198,16 @@ int CSfmlMainWindow::Display()
 
 		if (iRet != 0)break;
 
-		float fDelta = m_spineClock.getElapsedTime().asSeconds();
-		m_sfmlSpinePlayer->Update(fDelta);
+		const float fDelta = m_spineClock.getElapsedTime().asSeconds();
+		m_sfmlSpinePlayer->update(fDelta);
 		m_spineClock.restart();
 
 		m_window->clear(sf::Color(0, 0, 0, 0));
 		{
+			sf::RenderStates spineRenderStates(m_sfmlSpinePlayer->calculateTransformMatrix(&m_spineRenderTexture));
+
 			m_spineRenderTexture.clear();
-			m_sfmlSpinePlayer->Draw(&m_spineRenderTexture);
+			m_sfmlSpinePlayer->redraw(&m_spineRenderTexture, spineRenderStates);
 			m_spineRenderTexture.display();
 
 			sf::Sprite spineSprite(m_spineRenderTexture.getTexture());
@@ -227,8 +238,8 @@ void CSfmlMainWindow::ResizeWindow()
 {
 	if (m_sfmlSpinePlayer.get() != nullptr)
 	{
-		sf::Vector2f fBaseSize = m_sfmlSpinePlayer->GetBaseSize();
-		float fScale = m_sfmlSpinePlayer->GetCanvasScale();
+		sf::Vector2f fBaseSize = m_sfmlSpinePlayer->getBaseSize();
+		float fScale = m_sfmlSpinePlayer->getCanvasScale();
 
 		unsigned int uiWindowWidthMax = static_cast<unsigned int>(fBaseSize.x * fScale);
 		unsigned int uiWindowHeightMax = static_cast<unsigned int>(fBaseSize.y * fScale);
@@ -246,8 +257,8 @@ bool CSfmlMainWindow::SaveCurrentFrameToFile()
 {
 	/*SFML does not have API equivalent to SDL's SDL_GetBasePath().*/
 	float fTrackTime = 0.f;
-	m_sfmlSpinePlayer->GetCurrentAnimationTime(&fTrackTime, nullptr, nullptr, nullptr);
-	const char* pzAnimationName = m_sfmlSpinePlayer->GetCurrentAnimationName();
+	m_sfmlSpinePlayer->getCurrentAnimationTime(&fTrackTime, nullptr, nullptr, nullptr);
+	const char* pzAnimationName = m_sfmlSpinePlayer->getCurrentAnimationName();
 	if (pzAnimationName == nullptr)return false;
 
 	std::string strFilePath = pzAnimationName;
@@ -298,7 +309,7 @@ void CSfmlMainWindow::SetScenarioData(std::vector<adv::TextDatum>& textData, std
 
 	if (!m_animationNames.empty())
 	{
-		m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[0].c_str());
+		m_sfmlSpinePlayer->setAnimationByName(m_animationNames[0].c_str());
 	}
 }
 /*文字色切り替え*/
@@ -384,7 +395,7 @@ void CSfmlMainWindow::ShiftAnimation()
 {
 	if (m_animationNames.empty())
 	{
-		m_sfmlSpinePlayer->ShiftAnimation();
+		m_sfmlSpinePlayer->shiftAnimation();
 	}
 	else if (!m_bImageSynced)
 	{
@@ -393,7 +404,7 @@ void CSfmlMainWindow::ShiftAnimation()
 			m_nLastAnimationIndex = 0;
 		}
 
-		m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
+		m_sfmlSpinePlayer->setAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
 	}
 }
 
@@ -407,7 +418,7 @@ void CSfmlMainWindow::CheckAnimationTrack()
 		if (textDatum.nAnimationIndex < m_animationNames.size())
 		{
 			m_nLastAnimationIndex = textDatum.nAnimationIndex;
-			m_sfmlSpinePlayer->SetAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
+			m_sfmlSpinePlayer->setAnimationByName(m_animationNames[m_nLastAnimationIndex].c_str());
 		}
 	}
 }

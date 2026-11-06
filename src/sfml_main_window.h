@@ -23,6 +23,8 @@ public:
 
 	sf::RenderWindow* GetWindow() const { return m_window.get(); }
 private:
+	static constexpr float kScaleDelta = 0.025f;
+
 	std::unique_ptr<sf::RenderWindow> m_window;
 
 	std::unique_ptr<CSfmlSpinePlayer> m_sfmlSpinePlayer;
