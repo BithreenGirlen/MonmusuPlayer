@@ -44,6 +44,12 @@ private:
 		bool isImageSynced = true;
 	};
 
+	struct MonitorInfo
+	{
+		sf::Vector2i position;
+		sf::Vector2u size;
+	};
+
 	std::unique_ptr<sf::RenderWindow> m_window;
 
 	MouseState m_mouseState;
@@ -55,6 +61,8 @@ private:
 	sf::RenderTexture m_spineRenderTexture;
 
 	void resizeWindow();
+	void alignWindowToTheTopLeftOfMonitor();
+	MonitorInfo getMonitorInfo();
 
 	bool saveCurrentFrameToFile();
 	/*文章表示用*/

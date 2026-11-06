@@ -6,7 +6,7 @@ CSfmlMainWindow::CSfmlMainWindow(const char32_t* windowName)
 {
 	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode({ 200, 200 }), windowName, sf::Style::None);
 
-	m_window->setPosition(sf::Vector2i(0, 0));
+	alignWindowToTheTopLeftOfMonitor();
 
 	m_sfmlSpinePlayer = std::make_unique<CSfmlSpinePlayer>();
 }
@@ -223,21 +223,55 @@ int CSfmlMainWindow::display()
 
 void CSfmlMainWindow::resizeWindow()
 {
-	if (m_sfmlSpinePlayer.get() != nullptr)
+	sf::Vector2f fBaseSize = m_sfmlSpinePlayer->getBaseSize();
+	float fScale = m_sfmlSpinePlayer->getCanvasScale();
+
+	const unsigned int maxWindowWidth = static_cast<unsigned int>(fBaseSize.x * (fScale - kScaleDelta));
+	const unsigned int maxWindowHeight = static_cast<unsigned int>(fBaseSize.y * (fScale - kScaleDelta));
+
+	const sf::Vector2u monitorSize = getMonitorInfo().size;
+	/*
+	* Instability of borderless window with max resolution has not been fixed even in SFML 3.0.2
+	* https://github.com/SFML/SFML/issues/1284
+	*/
+	if (maxWindowWidth < monitorSize.x || maxWindowHeight < monitorSize.y)
 	{
-		sf::Vector2f fBaseSize = m_sfmlSpinePlayer->getBaseSize();
-		float fScale = m_sfmlSpinePlayer->getCanvasScale();
+		const unsigned int windowWidth = static_cast<unsigned int>(fBaseSize.x * fScale);
+		const unsigned int windowHeight = static_cast<unsigned int>(fBaseSize.y * fScale);
 
-		unsigned int uiWindowWidthMax = static_cast<unsigned int>(fBaseSize.x * fScale);
-		unsigned int uiWindowHeightMax = static_cast<unsigned int>(fBaseSize.y * fScale);
-
-		sf::Vector2u windowSize = sf::Vector2u(static_cast<unsigned int>(fBaseSize.x * fScale), static_cast<unsigned int>(fBaseSize.y * fScale));
-		m_window->setSize(windowSize);
+		m_window->setSize(sf::Vector2u(windowWidth, windowHeight));
 		m_window->setView(sf::View((fBaseSize * fScale) / 2.f, fBaseSize * fScale));
 
-		/* This is [[nodiscard]], but what to do should it fail? */
-		bool bRet = m_spineRenderTexture.resize(windowSize);
+		bool bRet = m_spineRenderTexture.resize({ windowWidth, windowHeight });
 	}
+}
+
+void CSfmlMainWindow::alignWindowToTheTopLeftOfMonitor()
+{
+	m_window->setPosition(getMonitorInfo().position);
+}
+
+CSfmlMainWindow::MonitorInfo CSfmlMainWindow::getMonitorInfo()
+{
+	/* SFML does know only primary monitor. */
+#if defined (_WIN32)
+	MONITORINFO monitorInfo{ sizeof(MONITORINFO) };
+	HMONITOR hMonitor = ::MonitorFromWindow(m_window->getNativeHandle(), MONITOR_DEFAULTTONEAREST);
+	if (hMonitor != nullptr)
+	{
+		::GetMonitorInfoW(hMonitor, &monitorInfo);
+	}
+
+	const int x = static_cast<int>(monitorInfo.rcMonitor.left);
+	const int y = static_cast<int>(monitorInfo.rcMonitor.top);
+
+	const unsigned int width = static_cast<unsigned int>(monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left);
+	const unsigned int height = static_cast<unsigned int>(monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top);
+
+	return { {x, y}, {width, height} };
+#else
+	return { {}, sf::VideoMode::getDesktopMode().size };
+#endif
 }
 
 bool CSfmlMainWindow::saveCurrentFrameToFile()
@@ -266,7 +300,6 @@ bool CSfmlMainWindow::setFont(const std::string& fontFilePath, bool bold, bool i
 
 	static constexpr float kOutLineThickness = 2.4f;
 
-	/* SFML does not provide the way to retrieve DPI. */
 	static const auto GetDpiScale = [](const sf::Window* const pWindow)
 		-> float
 		{
