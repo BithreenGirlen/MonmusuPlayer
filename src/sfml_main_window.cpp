@@ -28,12 +28,6 @@ int CSfmlMainWindow::display()
 
 	updateMessageText();
 
-	sf::Vector2i iMouseStartPos;
-
-	bool bOnWindowMove = false;
-	bool bLeftDowned = false;
-	bool bLeftCombined = false;
-
 	int iRet = 0;
 
 	m_spineClock.restart();
@@ -49,37 +43,37 @@ int CSfmlMainWindow::display()
 			{
 				if (event.button == sf::Mouse::Button::Left)
 				{
-					iMouseStartPos = event.position;
+					m_mouseState.lastMousePos = event.position;
 
-					bLeftDowned = true;
+					m_mouseState.wasLeftPressed = true;
 				}
 			},
 			[&](const sf::Event::MouseButtonReleased& event)
 			{
 				if (event.button == sf::Mouse::Button::Left)
 				{
-					if (bLeftCombined)
+					if (m_mouseState.wasLeftCombined || m_mouseState.wasLeftDragged)
 					{
-						bLeftCombined = false;
-						bLeftDowned = false;
+						m_mouseState.wasLeftCombined = false;
+						m_mouseState.wasLeftPressed = false;
+						m_mouseState.wasLeftDragged = false;
+
 						return;
 					}
 
-					if (bOnWindowMove || sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
+					if (m_windowState.toBeMoved || sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 					{
-						bOnWindowMove ^= true;
+						m_windowState.toBeMoved ^= true;
 						return;
 					}
 
-					int iX = iMouseStartPos.x - event.position.x;
-					int iY = iMouseStartPos.y - event.position.y;
-
-					if (iX == 0 && iY == 0)
+					const sf::Vector2i mouseDelta = m_mouseState.lastMousePos - event.position;
+					if (mouseDelta.x == 0 && mouseDelta.y == 0)
 					{
 						shiftAnimation();
 					}
 
-					bLeftDowned = false;
+					m_mouseState.wasLeftPressed = false;
 				}
 				else if (event.button == sf::Mouse::Button::Middle)
 				{
@@ -91,15 +85,17 @@ int CSfmlMainWindow::display()
 			{
 				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
 				{
-					if (bLeftDowned)
+					if (!m_mouseState.wasLeftCombined)
 					{
-						int iX = iMouseStartPos.x - event.position.x;
-						int iY = iMouseStartPos.y - event.position.y;
-						m_sfmlSpinePlayer->addOffset(iX, iY);
+						if (m_mouseState.wasLeftDragged)
+						{
+							const sf::Vector2i mouseDelta = m_mouseState.lastMousePos - event.position;
+							m_sfmlSpinePlayer->addOffset(mouseDelta.x, mouseDelta.y);
+						}
 
-						iMouseStartPos = event.position;
+						m_mouseState.lastMousePos = event.position;
 
-						bLeftCombined = true;
+						m_mouseState.wasLeftDragged = true;
 					}
 				}
 			},
@@ -114,7 +110,7 @@ int CSfmlMainWindow::display()
 					timeScale = (std::max)(timeScale, 0.f);
 					m_sfmlSpinePlayer->setTimeScale(timeScale);
 
-					bLeftCombined = true;
+					m_mouseState.wasLeftCombined = true;
 				}
 				else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
 				{
@@ -205,7 +201,7 @@ int CSfmlMainWindow::display()
 			m_window->draw(spineSprite);
 		}
 
-		if (!m_bTextHidden)
+		if (!m_sceneState.isTextHidden)
 		{
 			m_window->draw(*m_msgText);
 		}
@@ -214,11 +210,11 @@ int CSfmlMainWindow::display()
 
 		checkTimer();
 
-		if (bOnWindowMove)
+		if (m_windowState.toBeMoved)
 		{
-			int iPosX = sf::Mouse::getPosition().x - m_window->getSize().x / 2;
-			int iPosY = sf::Mouse::getPosition().y - m_window->getSize().y / 2;
-			m_window->setPosition(sf::Vector2i(iPosX, iPosY));
+			const int iWindowPosX = sf::Mouse::getPosition().x - m_window->getSize().x / 2;
+			const int iWindowPosY = sf::Mouse::getPosition().y - m_window->getSize().y / 2;
+			m_window->setPosition(sf::Vector2i(iWindowPosX, iWindowPosY));
 		}
 	}
 
@@ -263,15 +259,15 @@ bool CSfmlMainWindow::saveCurrentFrameToFile()
 	return image.saveToFile(strFilePath);
 }
 /*字体設定*/
-bool CSfmlMainWindow::setFont(const std::string& strFilePath, bool bBold, bool bItalic)
+bool CSfmlMainWindow::setFont(const std::string& fontFilePath, bool bold, bool italic)
 {
-	bool bRet = m_font.openFromFile(strFilePath);
+	bool bRet = m_font.openFromFile(fontFilePath);
 	if (!bRet)return false;
 
 	constexpr float fOutLineThickness = 2.4f;
 	m_msgText = std::make_unique<sf::Text>(m_font);
 	m_msgText->setFillColor(sf::Color::Black);
-	m_msgText->setStyle((bBold ? sf::Text::Style::Bold : 0) | (bItalic ? sf::Text::Style::Italic : 0));
+	m_msgText->setStyle((bold ? sf::Text::Style::Bold : 0) | (italic ? sf::Text::Style::Italic : 0));
 	m_msgText->setOutlineThickness(fOutLineThickness);
 	m_msgText->setOutlineColor(sf::Color::White);
 
@@ -312,13 +308,13 @@ void CSfmlMainWindow::toggleTextColor()
 
 void CSfmlMainWindow::toggleTextVisibility()
 {
-	m_bTextHidden ^= true;
+	m_sceneState.isTextHidden ^= true;
 }
 
 void CSfmlMainWindow::toggleImageSync()
 {
-	m_bImageSynced ^= true;
-	if (m_bImageSynced)
+	m_sceneState.isImageSynced ^= true;
+	if (m_sceneState.isImageSynced)
 	{
 		checkAnimationTrack();
 	}
@@ -341,9 +337,9 @@ void CSfmlMainWindow::checkTimer()
 	}
 }
 /*表示文章移行*/
-void CSfmlMainWindow::shiftMessageText(bool bForward)
+void CSfmlMainWindow::shiftMessageText(bool forward)
 {
-	if (bForward)
+	if (forward)
 	{
 		++m_nTextIndex;
 		if (m_nTextIndex >= m_textData.size())m_nTextIndex = 0;
@@ -368,7 +364,7 @@ void CSfmlMainWindow::updateMessageText()
 	m_msgText->setString(wstr);
 
 	/* Checks if animation has to be switched or not. */
-	if (m_bImageSynced)
+	if (m_sceneState.isImageSynced)
 	{
 		checkAnimationTrack();
 	}
@@ -388,7 +384,7 @@ void CSfmlMainWindow::shiftAnimation()
 	{
 		m_sfmlSpinePlayer->shiftAnimation();
 	}
-	else if (!m_bImageSynced)
+	else if (!m_sceneState.isImageSynced)
 	{
 		if (++m_nLastAnimationIndex >= m_animationNames.size())
 		{

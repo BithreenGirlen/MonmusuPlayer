@@ -24,7 +24,31 @@ public:
 private:
 	static constexpr float kScaleDelta = 0.025f;
 
+	struct MouseState
+	{
+		bool wasLeftPressed = false;
+		bool wasLeftCombined = false;
+		bool wasLeftDragged = false;
+
+		sf::Vector2i lastMousePos{};
+	};
+
+	struct WindowState
+	{
+		bool toBeMoved = false;
+	};
+
+	struct SceneState
+	{
+		bool isTextHidden = false;
+		bool isImageSynced = true;
+	};
+
 	std::unique_ptr<sf::RenderWindow> m_window;
+
+	MouseState m_mouseState;
+	WindowState m_windowState;
+	SceneState m_sceneState;
 
 	std::unique_ptr<CSfmlSpinePlayer> m_sfmlSpinePlayer;
 	sf::Clock m_spineClock;
@@ -35,7 +59,7 @@ private:
 	bool saveCurrentFrameToFile();
 	/*文章表示用*/
 public:
-	bool setFont(const std::string& strFilePath, bool bBold, bool bItalic);
+	bool setFont(const std::string& fontFilePath, bool bold, bool Italic);
 	void setScenarioData(std::vector<adv::TextDatum>& textData, std::vector<std::string>& animationNames);
 private:
 	sf::Font m_font;
@@ -44,8 +68,6 @@ private:
 
 	std::vector<adv::TextDatum> m_textData;
 	size_t m_nTextIndex = 0;
-	bool m_bTextHidden = false;
-	bool m_bImageSynced = true;
 
 	std::vector<std::string> m_animationNames;
 	size_t m_nLastAnimationIndex = 0;
@@ -55,7 +77,7 @@ private:
 	void toggleImageSync();
 
 	void checkTimer();
-	void shiftMessageText(bool bForward);
+	void shiftMessageText(bool forward);
 	void updateMessageText();
 
 	void shiftAnimation();
