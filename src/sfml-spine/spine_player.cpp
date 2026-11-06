@@ -579,7 +579,7 @@ void CSpinePlayer::setSlotsToExclude(const std::vector<std::string>& slotNames)
 	}
 }
 
-void CSpinePlayer::setSlotExcludeCallback(bool(*pFunc)(const char*, size_t))
+void CSpinePlayer::setSlotExcludeCallback(bool(*pFunc)(const char*, size_t)) noexcept
 {
 	for (const auto& pDrawable : m_drawables)
 	{

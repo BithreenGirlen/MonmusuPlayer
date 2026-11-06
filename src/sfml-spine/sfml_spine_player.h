@@ -13,7 +13,7 @@ public:
 
 	sf::Transform calculateTransformMatrix(sf::RenderTarget* pRenderTarget) const noexcept;
 	sf::FloatRect getCurrentBoundingBox() const;
-	sf::FloatRect getCurrentBoundingBoxOfSlot(std::string_view slotName) const;
+	sf::FloatRect getCurrentBoundingBoxOfSlot(const char* slotName, size_t slotNameLength) const;
 private:
 	void workOutDefaultScale() override;
 	bool workOutDefaultSizeAndOffset() override;

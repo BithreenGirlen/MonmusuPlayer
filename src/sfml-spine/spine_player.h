@@ -102,7 +102,7 @@ public:
 	void clearMixedAnimation();
 
 	void setSlotsToExclude(const std::vector<std::string>& slotNames);
-	void setSlotExcludeCallback(bool (*pFunc)(const char*, size_t));
+	void setSlotExcludeCallback(bool (*pFunc)(const char*, size_t)) noexcept;
 
 #if defined(ALLOW_FORCE_REPLACEMENT)
 	/// @brief Searches slots having multiple attachments. If each slot is associated with only single attachment, returns empty.

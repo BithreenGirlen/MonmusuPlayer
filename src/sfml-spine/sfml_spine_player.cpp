@@ -51,12 +51,12 @@ sf::FloatRect CSfmlSpinePlayer::getCurrentBoundingBox() const
 	return { {fMinX, fMinY}, {fMaxX - fMinX, fMaxY - fMinY} };
 }
 
-sf::FloatRect CSfmlSpinePlayer::getCurrentBoundingBoxOfSlot(std::string_view slotName) const
+sf::FloatRect CSfmlSpinePlayer::getCurrentBoundingBoxOfSlot(const char* slotName, size_t slotNameLength) const
 {
 	bool found = false;
 	for (const auto& drawable : m_drawables)
 	{
-		const auto& rect = drawable->getBoundingBoxOfSlot(slotName.data(), slotName.size(), &found);
+		const auto& rect = drawable->getBoundingBoxOfSlot(slotName, slotNameLength, &found);
 		if (found)
 		{
 			return rect;

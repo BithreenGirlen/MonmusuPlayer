@@ -64,6 +64,9 @@ private:
 	void alignWindowToTheTopLeftOfMonitor();
 	MonitorInfo getMonitorInfo();
 
+	void setSpinePlayerSize();
+	void resetSpinePlayerScale();
+
 	bool saveCurrentFrameToFile();
 	/*文章表示用*/
 public:

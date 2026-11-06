@@ -23,8 +23,8 @@ void CSfmlMainWindow::setSlotExclusionCallback(bool (*pFunc)(const char*, size_t
 
 int CSfmlMainWindow::display()
 {
-	m_sfmlSpinePlayer->resetScale();
-	resizeWindow();
+	setSpinePlayerSize();
+	resetSpinePlayerScale();
 
 	updateMessageText();
 
@@ -77,8 +77,7 @@ int CSfmlMainWindow::display()
 				}
 				else if (event.button == sf::Mouse::Button::Middle)
 				{
-					m_sfmlSpinePlayer->resetScale();
-					resizeWindow();
+					resetSpinePlayerScale();
 				}
 			},
 			[&](const sf::Event::MouseMoved& event)
@@ -274,23 +273,72 @@ CSfmlMainWindow::MonitorInfo CSfmlMainWindow::getMonitorInfo()
 #endif
 }
 
+void CSfmlMainWindow::setSpinePlayerSize()
+{
+	const std::vector<std::string>& slotNames = m_sfmlSpinePlayer->getSlotNames();
+	if (!slotNames.empty())
+	{
+		const size_t nMaxCount = slotNames.size() < 3ULL ? slotNames.size() : 3ULL;
+		for (size_t i = 0; i < nMaxCount; ++i)
+		{
+			const std::string& slotName = slotNames[i];
+			static constexpr const char bgSlotName[] = "bg";
+			static constexpr size_t kBgSlotNameLength = sizeof(bgSlotName) - 1;
+
+#if defined(_WIN32)
+			int iRet = _strnicmp(slotName.c_str(), bgSlotName, kBgSlotNameLength);
+#else
+			int iRet = strncasecmp(slotName.c_str(), bgSlotName, kBgSlotNameLength);
+#endif
+			if (iRet != 0)continue;
+
+			const sf::Vector2f wholeSize = m_sfmlSpinePlayer->getBaseSize();
+			const sf::FloatRect bgBoundingBox = m_sfmlSpinePlayer->getCurrentBoundingBoxOfSlot(slotName.data(), slotName.length());
+			if (bgBoundingBox.size.x != 0.f)
+			{
+				const float fRatio = wholeSize.x / bgBoundingBox.size.x;
+				if (::isgreater(fRatio, 0.8f) && ::isless(fRatio, 1.2f))
+				{
+					m_sfmlSpinePlayer->setBaseSize(bgBoundingBox.size.x, bgBoundingBox.size.y);
+					m_sfmlSpinePlayer->update(0.f);
+
+					const sf::FloatRect updatedBgBoundingBox = m_sfmlSpinePlayer->getCurrentBoundingBoxOfSlot(slotName.data(), slotName.length());
+					FPoint2 offsetToBe = m_sfmlSpinePlayer->getOffset();
+					offsetToBe.x += updatedBgBoundingBox.position.x;
+					offsetToBe.y += updatedBgBoundingBox.position.y;
+					m_sfmlSpinePlayer->setOffset(offsetToBe.x, offsetToBe.y);
+					m_sfmlSpinePlayer->setBaseSize(bgBoundingBox.size.x, bgBoundingBox.size.y);
+				}
+			}
+		}
+	}
+}
+
+void CSfmlMainWindow::resetSpinePlayerScale()
+{
+	m_sfmlSpinePlayer->resetScale();
+	m_sfmlSpinePlayer->setSkeletonScale(m_sfmlSpinePlayer->getSkeletonScale() + 0.05f);
+
+	resizeWindow();
+
+}
+
 bool CSfmlMainWindow::saveCurrentFrameToFile()
 {
-	/*SFML does not have API equivalent to SDL's SDL_GetBasePath().*/
+	/* SFML does not have API equivalent to SDL's SDL_GetBasePath(). */
 	float fTrackTime = 0.f;
 	m_sfmlSpinePlayer->getCurrentAnimationTime(&fTrackTime, nullptr, nullptr, nullptr);
 	const char* pzAnimationName = m_sfmlSpinePlayer->getCurrentAnimationName();
 	if (pzAnimationName == nullptr)return false;
 
-	std::string strFilePath = pzAnimationName;
-	char sBuffer[16]{};
-	sprintf_s(sBuffer, "_%.3f.png", fTrackTime);
-	strFilePath += sBuffer;
+	char pathBuffer[512]{};
+	int iWritten = ::sprintf_s(pathBuffer, "%s_%.3f.png", pzAnimationName, fTrackTime);
+	if (iWritten == -1)return false;
 
 	sf::Texture texture = m_spineRenderTexture.getTexture();
 	sf::Image image = texture.copyToImage();
 
-	return image.saveToFile(strFilePath);
+	return image.saveToFile(pathBuffer);
 }
 /*字体設定*/
 bool CSfmlMainWindow::setFont(const std::string& fontFilePath, bool bold, bool italic)
@@ -404,11 +452,27 @@ void CSfmlMainWindow::updateMessageText()
 	if (m_nTextIndex >= m_textData.size())return;
 
 	const adv::TextDatum& textDatum = m_textData[m_nTextIndex];
-	std::wstring wstr = textDatum.wstrText;
-	if (!wstr.empty() && wstr.back() != L'\n') wstr += L"\n ";
-
-	wstr += std::to_wstring(m_nTextIndex + 1) + L"/" + std::to_wstring(m_textData.size());
-	m_msgText->setString(wstr);
+	/* Actually, SFML uses char32_t string for sf::Text. */
+	wchar_t textBuffer[1024]{};
+	static constexpr size_t kTextBufferCapacity = std::size(textBuffer) - 1;
+	/* size_t is 20 digits at most, so "%zu/%zu" would be within this length. */
+	static constexpr size_t kMaximumIndexerLength = 41;
+	if (textDatum.wstrText.size() < kTextBufferCapacity - kMaximumIndexerLength)
+	{
+		::wmemcpy(textBuffer, textDatum.wstrText.data(), textDatum.wstrText.size());
+		size_t nTextBufferLength = textDatum.wstrText.size();
+		if (textBuffer[nTextBufferLength] != L'\n')
+		{
+			textBuffer[nTextBufferLength++] = L'\n';
+		}
+		int iWritten = ::swprintf_s(&textBuffer[nTextBufferLength], kTextBufferCapacity - nTextBufferLength, L"%zu/%zu", m_nTextIndex + 1, m_textData.size());
+		if (iWritten != -1)
+		{
+			nTextBufferLength += static_cast<size_t>(iWritten);
+			textBuffer[nTextBufferLength] = L'\0';
+			m_msgText->setString(textBuffer);
+		}
+	}
 
 	/* Checks if animation has to be switched or not. */
 	if (m_sceneState.isImageSynced)
